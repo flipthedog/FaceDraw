@@ -1,6 +1,7 @@
 # Processing, binarizing the image
 
 import cv2 as cv
+import numpy as np
 import time
 
 # grayImage
@@ -58,39 +59,51 @@ def thresholdImage(gray_image, stringType, gaussianSize):
 
     return thresholdImage
 
-# 
-def morphTrans(threshold_image, stringType)
+# morphTrans()
+# Perform a morphological transformation on the image
+# Input: treshold_image: The thresholded image that needs to be morphed
+# Input: stringType: A string or integer to select the type of transform
+# stringType:
+# "erosion" or "erode" or 0: Erode the selected image
+# "dilute" or "dilution" or 1: Dilute the selected image
+def morphTrans(threshold_image, stringType, iterations):
 
+    if stringType is "erosion" or stringType is "erode" or stringType is 0:
+        kernel = np.ones((5, 5), 'uint8')
+        morphed_image = cv.erode(threshold_image, kernel, iterations)
+    elif stringType is "dilate" or stringType is "dilation" or stringType is 1:
+        kernel = np.zeros((5,5), 'uint8')
+        morphed_image = cv.dilate(threshold_image, kernel, iterations)
+    else:
+        print("Error: Incorrect morphtrans() parameters")
 
-# Opening the image
-image_name = 'pap_1.png'
+    return morphed_image
 
-def processImage(image, imagename):
+def processImage(imagename):
 
     try:
-        if image is not None:
-            full_image_name = 'images/' + image_name
-            imageToProcess = cv.imread(full_image_name)
-        else:
-            imageToProcess = image
+        full_image_name = 'images/' + image_name
+        imageToProcess = cv.imread(full_image_name)
     except Exception:
         print("Error: Image not opened")
 
     gray_image = grayImage(imageToProcess)
-    blurred_image = blurImage(gray_image)
-    threshold_image = thresholdImage(blurred_image)
+    blurred_image = blurImage(gray_image, "bilateral")
+    threshold_image = thresholdImage(blurred_image, "otsu", 2)
+    threshold_image = cv.threshold(threshold_image, 0, 255, cv.THRESH_BINARY)
+    dilated_image = morphTrans(threshold_image, 1, 100)
+    eroded_image = morphTrans(threshold_image, 0 ,1)
 
+    cv.imshow("Original", imageToProcess)
+    cv.imshow("Gray", gray_image)
+    cv.imshow("Blurred", blurred_image)
+    cv.imshow("Threshold", threshold_image)
+    cv.imshow("Dilated", dilated_image)
+    cv.imshow("Eroded", eroded_image)
 
-#cv.drawContours(contoured_image, contours, -1, (255,255,0), 3)
-cv.imshow('Original', image)
-#cv.imshow('Your picture after', gray_image)
-cv.imshow('Contours? ', contoured_image)
-cv.imshow("Blurred", blur)
-cv.imshow("Median Blur", medianBlur)
-cv.imshow("Gaussian thresh", th2)
-cv.imshow("Blurred Gaussian Thresh", th3)
-cv.imshow("Median Blur, Gaussian thresh", th4)
-cv.imshow("Bilateral Blur, Gaussian thresh", th5)
-cv.waitKey(0)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
-cv.destroyAllWindows()
+# Opening the image
+image_name = 'pap_1.png'
+processImage(image_name)
