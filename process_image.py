@@ -70,7 +70,7 @@ def morphTrans(threshold_image, stringType, iterations):
 
     if stringType is "erosion" or stringType is "erode" or stringType is 0:
         kernel = np.ones((5, 5), np.uint8)
-        morphed_image = cv.erode(threshold_i~mage, kernel, iterations)
+        morphed_image = cv.erode(threshold_image, kernel, iterations)
     elif stringType is "dilate" or stringType is "dilation" or stringType is 1:
         print("This ran")
         kernel = np.ones((5, 5), np.uint8)

@@ -32,8 +32,8 @@ def image_to_gcode(image, linewidth, raster, filename):
     writeBody(file, image, linewidth)
     writeConclusion(file)
 
-    cv.imshow("This image", image)
-    cv.waitKey(0)
+    # cv.imshow("This image", image)
+    # cv.waitKey(0)
 
     file.close()
 
