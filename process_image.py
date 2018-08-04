@@ -69,41 +69,65 @@ def thresholdImage(gray_image, stringType, gaussianSize):
 def morphTrans(threshold_image, stringType, iterations):
 
     if stringType is "erosion" or stringType is "erode" or stringType is 0:
-        kernel = np.ones((5, 5), 'uint8')
-        morphed_image = cv.erode(threshold_image, kernel, iterations)
+        kernel = np.ones((5, 5), np.uint8)
+        morphed_image = cv.erode(threshold_i~mage, kernel, iterations)
     elif stringType is "dilate" or stringType is "dilation" or stringType is 1:
-        kernel = np.zeros((5,5), 'uint8')
+        print("This ran")
+        kernel = np.ones((5, 5), np.uint8)
         morphed_image = cv.dilate(threshold_image, kernel, iterations)
     else:
         print("Error: Incorrect morphtrans() parameters")
 
     return morphed_image
+# edgeDetection
+# Use opencv's edge detection function Canny()
+# Input: gray_image: A gray-scale image
+# Output: An image with detected edges
+def edgeDetection(gray_image):
+    cannied_image = cv.Canny(gray_image, 155, 255)
+    return cannied_image
 
-def processImage(imagename):
-
+# openImage()
+# Open the image
+# Input: image_name: the name of the image to be opened
+# Output: The opened image
+def openImage(image_name):
     try:
         full_image_name = 'images/' + image_name
         imageToProcess = cv.imread(full_image_name)
-    except Exception:
+    except FileNotFoundError:
+        print(FileNotFoundError.strerror)
         print("Error: Image not opened")
 
+    return imageToProcess
+
+def processImage(image_name, displayWindows):
+
+    imageToProcess = openImage(image_name)
     gray_image = grayImage(imageToProcess)
-    blurred_image = blurImage(gray_image, "bilateral")
-    threshold_image = thresholdImage(blurred_image, "otsu", 2)
-    threshold_image = cv.threshold(threshold_image, 0, 255, cv.THRESH_BINARY)
-    dilated_image = morphTrans(threshold_image, 1, 100)
-    eroded_image = morphTrans(threshold_image, 0 ,1)
+    blur = blurImage(gray_image, 2)
+    canny_image = edgeDetection(blur)
 
-    cv.imshow("Original", imageToProcess)
-    cv.imshow("Gray", gray_image)
-    cv.imshow("Blurred", blurred_image)
-    cv.imshow("Threshold", threshold_image)
-    cv.imshow("Dilated", dilated_image)
-    cv.imshow("Eroded", eroded_image)
+    # eroded_image = morphTrans(canny_image, 0, 1)
+    # dilated_image = morphTrans(eroded_image, 1,10)
 
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # blurred_image = blurImage(gray_image, "bilateral")
+    # threshold_image = thresholdImage(blurred_image, "otsu", 2)
+    # #threshold_image = cv.threshold(threshold_image, 0, 255, cv.THRESH_BINARY)
+    # dilated_image = morphTrans(threshold_image, 1, 1)
+    # eroded_image = morphTrans(threshold_image, 0 ,100)
 
-# Opening the image
-image_name = 'pap_1.png'
-processImage(image_name)
+    # print("This is gray image width: " + str(gray_image.shape[0]))
+
+    if displayWindows:
+        cv.imshow("Original", imageToProcess)
+        cv.imshow("Gray", gray_image)
+        cv.imshow("Blurred", blurred_image)
+        cv.imshow("Threshold", threshold_image)
+        cv.imshow("Dilated", dilated_image)
+        cv.imshow("Eroded", eroded_image)
+
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
+    return canny_image
