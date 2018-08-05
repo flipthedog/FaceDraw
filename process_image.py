@@ -32,7 +32,7 @@ def blurImage(gray_image, stringType):
 # contourImage
 # Input: A grayscale image
 # Finds the contours of an image
-def contourImage(image):
+def contourImage(gray_image):
     ret, thresh = cv.threshold(gray_image, 55, 255, 0)
     contoured_image, contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     return contoured_image
@@ -79,6 +79,7 @@ def morphTrans(threshold_image, stringType, iterations):
         print("Error: Incorrect morphtrans() parameters")
 
     return morphed_image
+
 # edgeDetection
 # Use opencv's edge detection function Canny()
 # Input: gray_image: A gray-scale image
