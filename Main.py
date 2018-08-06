@@ -3,8 +3,11 @@ import process_image
 import create_g_code
 import cv2 as cv
 
+import os
+
+import time
 import tkinter
-from tkinter import StringVar
+from tkinter import filedialog
 from tkinter import Label
 import PIL
 from PIL import Image
@@ -30,31 +33,71 @@ options_frame.grid(row=1, column=1, sticky='E')
 image_name_frame = tkinter.Frame(options_frame)
 image_name_frame.grid(row=0,sticky='N')
 blur_option = tkinter.Frame(options_frame)
-blur_option.grid(row=0, sticky='N')
+blur_option.grid(row=1, sticky='N')
 contour_option = tkinter.Frame(options_frame)
-contour_option.grid(row=1, sticky='N')
+contour_option.grid(row=2, sticky='N')
 threshold_option = tkinter.Frame(options_frame)
-threshold_option.grid(row=2, sticky='N')
+threshold_option.grid(row=3, sticky='N')
 morph_option = tkinter.Frame(options_frame)
-morph_option.grid(row=3,sticky='N')
+morph_option.grid(row=4,sticky='N')
 edgedetection_option = tkinter.Frame(options_frame)
-edgedetection_option.grid(row=4, sticky='N')
+edgedetection_option.grid(row=5, sticky='N')
 
 # Option elements
+
+# Image options
+
+def selectFileToOpen():
+    user_selected_image = filedialog.askopenfilename(initialdir="./images", title='FaceDraw: Open File')
+    # Opening the image
+    print(user_selected_image)
+    path, file_name = os.path.split(user_selected_image)
+    print(file_name)
+    cvimage = process_image.openImage(file_name)
+    cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
+
+    updateWindowImages(cvimage,user_selected_image)
+
+image_select_button = tkinter.Button(image_name_frame, text='Select Image', command=selectFileToOpen)
+image_select_button.pack()
 
 # Blur Elements
 blur_check = tkinter.IntVar()
 blur_checkbox = tkinter.Checkbutton(blur_option, text = "Blur Image", variable = blur_check, onvalue = 1, offvalue = 0)
-blur_checkbox.pack()
+blur_checkbox.grid(row=0, column=0)
+blur_type_options = {'regular', 'median', 'bilateral'}
+blur_type = tkinter.StringVar()
+blur_menu = tkinter.OptionMenu(blur_option, blur_type, *blur_type_options)
+blur_type.set("Choose Filter")
+blur_menu.grid(row=0,column=1)
 
 # Contour Elements
 contour_check = tkinter.IntVar()
-contour_checkbox = tkinter.Checkbutton(contour_option, text = "Contour Image", variable = contour_check, onvalue = 1, offvalue = 0)
+contour_checkbox = tkinter.Checkbutton(contour_option, text = "Find Contours", variable = contour_check, onvalue = 1, offvalue = 0)
 contour_checkbox.pack()
 
 # Threshold Elements
-thresh
+threshold_check = tkinter.IntVar()
+threshold_checkbox = tkinter.Checkbutton(threshold_option, text = "Perform Thresholding", variable = threshold_check, onvalue = 1, offvalue = 0)
+threshold_checkbox.grid(row=0, column=0)
+threshold_type_options = {'regular', 'gaussian', 'mean'}
+threshold_type = tkinter.StringVar()
+threshold_menu = tkinter.OptionMenu(threshold_option, threshold_type, *threshold_type_options)
+threshold_type.set("Choose Filter")
+threshold_menu.grid(row=0, column=1)
 
+# Edge Detection
+edge_check = tkinter.IntVar()
+edge_checkbox = tkinter.Checkbutton(edgedetection_option, text = "Perform Edge Detection", variable = edge_check, onvalue = 1, offvalue = 0)
+edge_checkbox.pack()
+
+# Morphing
+dilate_check = tkinter.IntVar()
+erode_check = tkinter.IntVar()
+dilate_checkbox = tkinter.Checkbutton(morph_option, text = "Dilate Image", variable = dilate_check, onvalue = 1, offvalue = 0)
+erode_checkbox = tkinter.Checkbutton(morph_option, text = "Erode Image", variable = erode_check, onvalue = 1, offvalue = 0)
+erode_checkbox.pack()
+dilate_checkbox.pack()
 
 # Title
 titleLabel = Label(title, text="FaceDraw", bg="#000fff")
@@ -68,7 +111,7 @@ image_frame2.grid(row=2, sticky='W')
 options_frame.grid(row=1, sticky='E')
 
 # Set window size
-root.geometry("300x300")
+root.geometry("800x700")
 
 # convertImageToTk()
 # Purpose: Convert a python-cv image to tkinter image
@@ -83,42 +126,48 @@ def convertImageToTk(cv_image, resize, width, height):
         tk_image = ImageTk.PhotoImage(pil_image)
     return tk_image
 
-# updateWindow()
-# Purpose: Update the main tkinter window
-def updateWindow():
-    processed_image_label.configure(image=processed_image_tk)
-    root.after(3000,updateWindow)
+# # updateWindow()
+# # Purpose: Update the main tkinter window
+# def updateWindow():
+#     new_image = getNewProcessedImage()
+#     processed_image_label.configure(image=processed_image_tk)
+#     root.after(3000,updateWindow)
 
 def getNewProcessedImage(opened_image):
     gray_image = process_image.grayImage(opened_image)
 
+# updateWindow()
+# Purpose: Update the main tkinter window
+def updateWindow():
+    new_image = getNewProcessedImage()
+    processed_image_label.configure(image=processed_image_tk)
+    root.after(3000,updateWindow)
+    if blur_check is 1:
+        blur_image = process_image.blurImage(gray_image, )
+
     None
 
-# Opening the image
-image_name = 'pap_1.png'
-cvimage = process_image.openImage(image_name)
-cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
+def updateWindowImages(cvimage, selected_image_name):
+    # Convert image to PIL Image, then to Tkinter image
+    # Original image GUI variables
+    original_image = convertImageToTk(cvimage, True, 400, 300)
+    o_image_text = tkinter.StringVar()
+    o_image_text.set("Your image: " + selected_image_name)
+    original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center').grid(row=0, sticky='N')
+    original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
+    original_image_label.grid(row=1, sticky='N')
 
-# Convert image to PIL Image, then to Tkinter image
-# Original image GUI variables
-original_image = convertImageToTk(cvimage, True, 400, 300)
-o_image_text = tkinter.StringVar()
-o_image_text.set("Your image: " + image_name)
-original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center').grid(row=0, sticky='N')
-original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
-original_image_label.grid(row=1, sticky='N')
-
-# Processed image GUI variables
-processed_image = process_image.processImage(image_name, False)
-processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
-p_image_text = tkinter.StringVar()
-p_image_text.set("Your processed image: ")
-processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center').grid(row=0, sticky='N')
-processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
-processed_image_label.grid(row=1, sticky='N')
+    # Processed image GUI variables
+    processed_image = process_image.processImage(selected_image_name, False)
+    processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
+    p_image_text = tkinter.StringVar()
+    p_image_text.set("Your processed image: ")
+    processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center').grid(row=0, sticky='N')
+    processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
+    processed_image_label.grid(row=1, sticky='N')
 
 # Create G-code from the processed image
-create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
+# create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
 
-root.after(100, updateWindow)
+# root.after(100, updateWindow)
 root.mainloop()
