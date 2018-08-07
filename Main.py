@@ -21,11 +21,48 @@ root = tkinter.Tk()
 title = tkinter.Frame(root)
 title.grid(row=0, sticky='n')
 
-# Image frames
+# convertImageToTk()
+# Purpose: Convert a python-cv image to tkinter image
+# Input: cv_image: a python-cv image to convert
+# Output: tk_image: A tkinter image
+def convertImageToTk(cv_image, resize, width, height):
+
+    # Convert color to RGB
+    try:
+        cv_image = cv.cvtColor(cv_image, cv.COLOR_BGR2RGB)
+    except Exception:
+        None
+
+    pil_image = Image.fromarray(cv_image)
+
+    if resize:
+        resized_image = pil_image.resize((width, height), Image.ANTIALIAS)
+        tk_image = ImageTk.PhotoImage(resized_image)
+    else:
+        tk_image = ImageTk.PhotoImage(pil_image)
+    return tk_image
+
+# Image Elements
 image_frame = tkinter.Frame(root)
 image_frame.grid(row=1, column=0, sticky='W')
+o_image_text = tkinter.StringVar()
+o_image_text.set("Please Select An Image")
+original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
+original_image_label_text.grid(row=0, sticky='N')
+blank_image = convertImageToTk(process_image.openImage("BlueSquare.png"), True, 300, 300)
+original_image_label = tkinter.Label(image_frame, image=blank_image, anchor='center')
+original_image_label.image = blank_image
+original_image_label.grid(row=1, column=0)
+
 image_frame2 = tkinter.Frame(root)
 image_frame2.grid(row=2, column=0, sticky='W')
+p_image_text = tkinter.StringVar()
+p_image_text.set("")
+processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center')
+processed_image_label_text.grid(row=0, sticky='N')
+processed_image_label = tkinter.Label(image_frame2, image=blank_image, anchor='center')
+processed_image_label.image = blank_image
+processed_image_label.grid(row=1, sticky='N')
 
 # Options frame
 options_frame = tkinter.Frame(root)
@@ -52,7 +89,7 @@ def selectFileToOpen():
     cvimage = process_image.openImage(file_name)
     #cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
 
-    updateWindowImages(cvimage,user_selected_image)
+    updateWindowImages(cvimage, user_selected_image)
 
 image_select_button = tkinter.Button(image_name_frame, text='Select Image', command=selectFileToOpen)
 image_select_button.grid(row=0, column=0)
@@ -138,25 +175,6 @@ options_frame.grid(row=1, sticky='E')
 # Set window size
 root.geometry("800x700")
 
-# convertImageToTk()
-# Purpose: Convert a python-cv image to tkinter image
-# Input: cv_image: a python-cv image to convert
-# Output: tk_image: A tkinter image
-def convertImageToTk(cv_image, resize, width, height):
-
-    # Convert color to RGB
-    cv_image = cv.cvtColor(cv_image, cv.COLOR_BGR2RGB)
-
-    pil_image = Image.fromarray(cv_image)
-
-    if resize:
-        resized_image = pil_image.resize((width, height), Image.ANTIALIAS)
-        tk_image = ImageTk.PhotoImage(resized_image)
-    else:
-        tk_image = ImageTk.PhotoImage(pil_image)
-    return tk_image
-
-
 # # updateWindow()
 # # Purpose: Update the main tkinter window
 # def updateWindow():
@@ -168,24 +186,18 @@ def updateWindowImages(cvimage, selected_image_name):
     # Convert image to PIL Image, then to Tkinter image
     # Original image GUI variables
     original_image = convertImageToTk(cvimage, True, 400, 300)
-    o_image_text = tkinter.StringVar()
     path, file_name = os.path.split(selected_image_name)
     o_image_text.set("Your image: " + file_name)
-    #original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
-    #original_image_label_text.grid(row=0, sticky='N')
-    original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
-    original_image_label.grid(row=1, column=0)
+    original_image_label.configure(image=original_image)
+    original_image_label.image = original_image
 
     # Processed image GUI variables
+    processed_image = getNewProcessedImage(cvimage)
+    processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
+    p_image_text.set("Your processed image: ")
 
-    # processed_image = getNewProcessedImage(cvimage)
-    # processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
-    # p_image_text = tkinter.StringVar()
-    # p_image_text.set("Your processed image: ")
-    # processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center')
-    # processed_image_label_text.grid(row=0, sticky='N')
-    # processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
-    # processed_image_label.grid(row=1, sticky='N')
+    processed_image_label.configure(image=processed_image_tk)
+    processed_image_label.image = processed_image_tk
 
 # getNewProcessedImage()
 # Purpose: Find a new processed image, with user settings
@@ -226,29 +238,5 @@ def getNewProcessedImage(cv_image):
 
 # Create G-code from the processed image
 # create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
-
-root.after(100, refresh)
-
-def testImageDisplay():
-    cvimage = process_image.openImage("pap_1.png")
-    original_image = convertImageToTk(cvimage, True, 400, 300)
-    o_image_text = tkinter.StringVar()
-    # path, file_name = os.path.split(selected_image_name)
-    # o_image_text.set("Your image: " + file_name)
-    original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
-    original_image_label_text.grid(row=0, sticky='N')
-    original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
-    original_image_label.image = original_image
-    original_image_label.grid(row=1, sticky='N')
-
-cvimage = process_image.openImage("pap_1.png")
-original_image = convertImageToTk(cvimage, True, 400, 300)
-o_image_text = tkinter.StringVar()
-# path, file_name = os.path.split(selected_image_name)
-# o_image_text.set("Your image: " + file_name)
-original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
-original_image_label_text.grid(row=0, sticky='N')
-original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
-original_image_label.grid(row=1, sticky='N')
 
 root.mainloop()
