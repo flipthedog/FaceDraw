@@ -55,7 +55,16 @@ def selectFileToOpen():
     updateWindowImages(cvimage,user_selected_image)
 
 image_select_button = tkinter.Button(image_name_frame, text='Select Image', command=selectFileToOpen)
-image_select_button.pack()
+image_select_button.grid(row=0, column=0)
+
+# updateWindow()
+# Purpose: Update the main tkinter window
+def refresh():
+    if threshold_type is "gaussian":
+        threshold_gaussiansize_box.grid(row=0, column=2)
+
+refresh_button = tkinter.Button(image_name_frame, text='Refresh', command=refresh)
+refresh_button.grid(row=0, column=1)
 
 # Blur Elements
 blur_check = tkinter.IntVar()
@@ -131,16 +140,6 @@ def convertImageToTk(cv_image, resize, width, height):
 #     processed_image_label.configure(image=processed_image_tk)
 #     root.after(3000,updateWindow)
 
-def getNewProcessedImage(opened_image):
-    gray_image = process_image.grayImage(opened_image)
-
-# updateWindow()
-# Purpose: Update the main tkinter window
-def updateWindow():
-    if threshold_type is "gaussian":
-        threshold_gaussiansize_box.grid(row=0, column=2)
-    root.after(300,updateWindow)
-
 def updateWindowImages(cvimage, selected_image_name):
     # Convert image to PIL Image, then to Tkinter image
     # Original image GUI variables
@@ -148,27 +147,30 @@ def updateWindowImages(cvimage, selected_image_name):
     o_image_text = tkinter.StringVar()
     path, file_name = os.path.split(selected_image_name)
     o_image_text.set("Your image: " + file_name)
-    original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center').grid(row=0, sticky='N')
+    original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
+    original_image_label_text.grid(row=0, sticky='N')
     original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
     original_image_label.grid(row=1, sticky='N')
 
     # Processed image GUI variables
 
-    processed_image = process_image.processImage(selected_image_name, False)
-    processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
-    p_image_text = tkinter.StringVar()
-    p_image_text.set("Your processed image: ")
-    processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center').grid(row=0, sticky='N')
-    processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
-    processed_image_label.grid(row=1, sticky='N')
+    # processed_image = getNewProcessedImage(cvimage)
+    # processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
+    # p_image_text = tkinter.StringVar()
+    # p_image_text.set("Your processed image: ")
+    # processed_image_label_text = tkinter.Label(image_frame2, textvariable=p_image_text, anchor='center')
+    # processed_image_label_text.grid(row=0, sticky='N')
+    # processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
+    # processed_image_label.grid(row=1, sticky='N')
 
 # getNewProcessedImage()
 # Purpose: Find a new processed image, with user settings
 # Input: cv_image: An image opened by open-cv
-# Output: tkinter_image: The tkinter image to be displayed
+# Output: tkinter_image: The image to be displayed by tkinter
 def getNewProcessedImage(cv_image):
     gray_image = process_image.grayImage(cv_image)
 
+    return gray_image
     # If statements to process user filter options
     if blur_check is 1:
         # Blur the image
@@ -185,15 +187,21 @@ def getNewProcessedImage(cv_image):
         contour_image = process_image.contourImage(blur_image)
 
     else:
+
         contour_image = blur_image
 
     if threshold_check is 1:
+
         threshold_image = process_image.thresholdImage(blur_image, threshold_type)
+
     else:
+
         threshold_image = blur_image
+
+    return threshold_image
 
 # Create G-code from the processed image
 # create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
 
-root.after(100, updateWindow)
+#root.after(100, refresh)
 root.mainloop()
