@@ -38,21 +38,17 @@ contour_option = tkinter.Frame(options_frame)
 contour_option.grid(row=2, sticky='N')
 threshold_option = tkinter.Frame(options_frame)
 threshold_option.grid(row=3, sticky='N')
-morph_option = tkinter.Frame(options_frame)
-morph_option.grid(row=4,sticky='N')
 edgedetection_option = tkinter.Frame(options_frame)
-edgedetection_option.grid(row=5, sticky='N')
-
-# Option elements
+edgedetection_option.grid(row=4, sticky='N')
+morph_option = tkinter.Frame(options_frame)
+morph_option.grid(row=5,sticky='N')
 
 # Image options
 
 def selectFileToOpen():
     user_selected_image = filedialog.askopenfilename(initialdir="./images", title='FaceDraw: Open File')
     # Opening the image
-    print(user_selected_image)
     path, file_name = os.path.split(user_selected_image)
-    print(file_name)
     cvimage = process_image.openImage(file_name)
     cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
 
@@ -85,6 +81,8 @@ threshold_type = tkinter.StringVar()
 threshold_menu = tkinter.OptionMenu(threshold_option, threshold_type, *threshold_type_options)
 threshold_type.set("Choose Filter")
 threshold_menu.grid(row=0, column=1)
+threshold_gaussiansize = tkinter.IntVar()
+threshold_gaussiansize_box = tkinter.Entry(threshold_option)
 
 # Edge Detection
 edge_check = tkinter.IntVar()
@@ -139,25 +137,23 @@ def getNewProcessedImage(opened_image):
 # updateWindow()
 # Purpose: Update the main tkinter window
 def updateWindow():
-    new_image = getNewProcessedImage()
-    processed_image_label.configure(image=processed_image_tk)
-    root.after(3000,updateWindow)
-    if blur_check is 1:
-        blur_image = process_image.blurImage(gray_image, )
-
-    None
+    if threshold_type is "gaussian":
+        threshold_gaussiansize_box.grid(row=0, column=2)
+    root.after(300,updateWindow)
 
 def updateWindowImages(cvimage, selected_image_name):
     # Convert image to PIL Image, then to Tkinter image
     # Original image GUI variables
     original_image = convertImageToTk(cvimage, True, 400, 300)
     o_image_text = tkinter.StringVar()
-    o_image_text.set("Your image: " + selected_image_name)
+    path, file_name = os.path.split(selected_image_name)
+    o_image_text.set("Your image: " + file_name)
     original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center').grid(row=0, sticky='N')
     original_image_label = tkinter.Label(image_frame, image=original_image, anchor='center')
     original_image_label.grid(row=1, sticky='N')
 
     # Processed image GUI variables
+
     processed_image = process_image.processImage(selected_image_name, False)
     processed_image_tk = convertImageToTk(processed_image, True, 400, 300)
     p_image_text = tkinter.StringVar()
@@ -166,8 +162,38 @@ def updateWindowImages(cvimage, selected_image_name):
     processed_image_label = tkinter.Label(image_frame2, image=processed_image_tk, anchor='center')
     processed_image_label.grid(row=1, sticky='N')
 
+# getNewProcessedImage()
+# Purpose: Find a new processed image, with user settings
+# Input: cv_image: An image opened by open-cv
+# Output: tkinter_image: The tkinter image to be displayed
+def getNewProcessedImage(cv_image):
+    gray_image = process_image.grayImage(cv_image)
+
+    # If statements to process user filter options
+    if blur_check is 1:
+        # Blur the image
+
+        if blur_type is not "Choose Filter":
+            blur_image = process_image.blurImage(gray_image, blur_type)
+
+    else:
+        blur_image = gray_image
+
+    if contour_check is 1:
+        # Find contours of the image
+
+        contour_image = process_image.contourImage(blur_image)
+
+    else:
+        contour_image = blur_image
+
+    if threshold_check is 1:
+        threshold_image = process_image.thresholdImage(blur_image, threshold_type)
+    else:
+        threshold_image = blur_image
+
 # Create G-code from the processed image
 # create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
 
-# root.after(100, updateWindow)
+root.after(100, updateWindow)
 root.mainloop()
