@@ -42,6 +42,7 @@ def convertImageToTk(cv_image, resize, width, height):
         tk_image = ImageTk.PhotoImage(pil_image)
     return tk_image
 
+
 # Image Elements
 image_frame = tkinter.Frame(root)
 image_frame.grid(row=1, column=0, sticky='W')
@@ -82,13 +83,14 @@ morph_option.grid(row=5,sticky='N')
 
 # Image options
 
+# selectFileToOpen
+# Purpose: Open a file based on user input, call window update function
 def selectFileToOpen():
     user_selected_image = filedialog.askopenfilename(initialdir="./images", title='FaceDraw: Open File')
     # Opening the image
     path, file_name = os.path.split(user_selected_image)
     cvimage = process_image.openImage(file_name)
     #cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
-
     updateWindowImages(cvimage, user_selected_image)
 
 image_select_button = tkinter.Button(image_name_frame, text='Select Image', command=selectFileToOpen)
@@ -99,7 +101,7 @@ image_select_button.grid(row=0, column=0)
 def refresh():
     if threshold_type is "gaussian":
         threshold_gaussiansize_box.grid(row=0, column=2)
-
+    updateWindowImages()
 
 refresh_button = tkinter.Button(image_name_frame, text='Refresh', command=refresh)
 refresh_button.grid(row=0, column=1)
@@ -114,12 +116,12 @@ def loadBlank():
     blank_image_label.grid(row=0, column=0)
     blank_image_frame = tkinter.Label(image_frame, image=blank_image, anchor='center')
     blank_image_frame.image = blank_image
+    image_frame.image = blank_image
+    image_frame2.image = blank_image
     blank_image_frame.grid(row=1, column=0)
-
 
 clear_button = tkinter.Button(image_name_frame, text='Clear', command=loadBlank)
 clear_button.grid(row=0, column=2)
-
 
 # Blur Elements
 blur_check = tkinter.IntVar()
@@ -206,7 +208,6 @@ def updateWindowImages(cvimage, selected_image_name):
 def getNewProcessedImage(cv_image):
     gray_image = process_image.grayImage(cv_image)
 
-    return gray_image
     # If statements to process user filter options
     if blur_check is 1:
         # Blur the image
@@ -239,4 +240,10 @@ def getNewProcessedImage(cv_image):
 # Create G-code from the processed image
 # create_g_code.image_to_gcode(processed_image, 0.3, True, "test_1.gcode")
 
+# initTraces
+# Purpose: Function to handle the initialization of traces
+def initTraces():
+    blur_check.trace_add("read", updateWindowImages)
+
+initTraces()
 root.mainloop()
