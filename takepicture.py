@@ -11,7 +11,7 @@ cv.waitKey(0)
 
 while True:
     if cv.waitKey(1) & 0xFF == ord('y'):
-        cv.imwrite('images/floris_2.png',frame)
+        cv.imwrite('images/floris_3.png',frame)
         print("Waiting")
         cv.destroyAllWindows()
         break

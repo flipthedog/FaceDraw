@@ -46,6 +46,7 @@ def convertImageToTk(cv_image, resize, width, height):
 # Image Elements
 image_frame = tkinter.Frame(root)
 image_frame.grid(row=1, column=0, sticky='W')
+shown_image_name = tkinter.StringVar()
 o_image_text = tkinter.StringVar()
 o_image_text.set("Please Select An Image")
 original_image_label_text = tkinter.Label(image_frame, textvariable=o_image_text, anchor='center')
@@ -91,7 +92,8 @@ def selectFileToOpen():
     path, file_name = os.path.split(user_selected_image)
     cvimage = process_image.openImage(file_name)
     #cvimage = cv.cvtColor(cvimage, cv.COLOR_BGR2RGB)
-    updateWindowImages(cvimage, user_selected_image)
+    shown_image_name.set(user_selected_image)
+    updateWindowImages(cvimage)
 
 image_select_button = tkinter.Button(image_name_frame, text='Select Image', command=selectFileToOpen)
 image_select_button.grid(row=0, column=0)
@@ -184,11 +186,11 @@ root.geometry("800x700")
 #     processed_image_label.configure(image=processed_image_tk)
 #     root.after(3000,updateWindow)
 
-def updateWindowImages(cvimage, selected_image_name):
+def updateWindowImages(cvimage):
     # Convert image to PIL Image, then to Tkinter image
     # Original image GUI variables
     original_image = convertImageToTk(cvimage, True, 400, 300)
-    path, file_name = os.path.split(selected_image_name)
+    path, file_name = os.path.split()
     o_image_text.set("Your image: " + file_name)
     original_image_label.configure(image=original_image)
     original_image_label.image = original_image
