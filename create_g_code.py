@@ -4,8 +4,18 @@
 import sys
 import sysconfig
 import time
+import process_image
+import cv2 as cv
 import _datetime
 import cv2 as cv
+
+test_image = process_image.openImage('slicer_test_1.png')
+cv.imshow('test', test_image)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+def readlines(test_image):
+
 
 # image_to_gcode
 # Input: image: the grayscale, line image to be converted into g-code commands
@@ -14,7 +24,6 @@ import cv2 as cv
 # Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
 def image_to_gcode(image, linewidth, raster, filename):
-
 
     # Check for file existence and overwrite if necessary
     try:

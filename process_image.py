@@ -59,6 +59,7 @@ def thresholdImage(gray_image, stringType, gaussianSize):
 
     return thresholdImage
 
+
 # morphTrans()
 # Perform a morphological transformation on the image
 # Input: treshold_image: The thresholded image that needs to be morphed
@@ -66,15 +67,16 @@ def thresholdImage(gray_image, stringType, gaussianSize):
 # stringType:
 # "erosion" or "erode" or 0: Erode the selected image
 # "dilute" or "dilution" or 1: Dilute the selected image
-def morphTrans(threshold_image, stringType, iterations):
+def morphTrans(threshold_image, stringType, intensity, iterations):
+
+    kernel = np.ones((intensity, intensity), np.uint8)
 
     if stringType is "erosion" or stringType is "erode" or stringType is 0:
-        kernel = np.ones((5, 5), np.uint8)
         morphed_image = cv.erode(threshold_image, kernel, iterations)
     elif stringType is "dilate" or stringType is "dilation" or stringType is 1:
-        print("This ran")
-        kernel = np.ones((5, 5), np.uint8)
         morphed_image = cv.dilate(threshold_image, kernel, iterations)
+    elif stringType is "open" or stringType is "opening" or stringType is 2:
+        morphed_image = cv.morphologyEx(threshold_image, cv.MORPH_OPEN, kernel)
     else:
         print("Error: Incorrect morphtrans() parameters")
 
@@ -85,7 +87,7 @@ def morphTrans(threshold_image, stringType, iterations):
 # Input: gray_image: A gray-scale image
 # Output: An image with detected edges
 def edgeDetection(gray_image):
-    cannied_image = cv.Canny(gray_image, 155, 255)
+    cannied_image = cv.Canny(gray_image, 100, 400, apertureSize=3)
     return cannied_image
 
 # openImage()
@@ -101,6 +103,13 @@ def openImage(image_name):
         print("Error: Image not opened")
 
     return imageToProcess
+
+# invertImage()
+# Invert the color of the image
+# Input: cv_image: The image to invert
+# Output: The inverted image
+def invertImage(cv_image):
+    return cv.bitwise_not(cv_image)
 
 def processImage(image_name, displayWindows):
 
