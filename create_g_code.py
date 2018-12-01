@@ -21,6 +21,7 @@ import cv2 as cv
 # Output: Boolean value representing whether the image still contains pixels
 def containsPixels(check_image):
     shape = check_image.shape
+
     width = shape[0]
     height = shape[1]
     # print("X: " + str(width) + " Y: " + str(height))
@@ -34,10 +35,11 @@ def containsPixels(check_image):
 
     new_coordinates = np.asarray(coordinates,dtype=np.uint8)
 
-    print(len(new_coordinates[0]))
     if not len(new_coordinates[0]) > 0:
+        # There are no more pixels to process, image contains no pixels
         return False
     else:
+        # There are still pixels to process, image still contains pixels
         return True
 
     # For testing and printing all pixels in the image
@@ -55,7 +57,8 @@ def containsPixels(check_image):
 # Find the distance between two pixels
 def distanceBetween(pixel_1, pixel_2):
 
-    return math.sqrt((pixel_1[0] - pixel_2[0])^2 + (pixel_1[1] - pixel_2[1])^2)
+    # print("Pixel: " + str(pixel_1[0]) + " , " + str(pixel_1[1]))
+    return math.sqrt((pixel_1[0] - pixel_2[0])**2 + (pixel_1[1] - pixel_2[1])**2)
 
 
 # findNear()
@@ -63,52 +66,133 @@ def distanceBetween(pixel_1, pixel_2):
 # Input: Image to check for nearby pixels
 # x, y coordinate of the pixel
 
-def findNear(check_image, x, y):
+def findNear(check_image, x, y, fit):
 
+    # The image to return
+    return_image = check_image
+
+    # The original pixel of the line
     home_pixel = [x, y]
 
+    #cv.imshow('lol', check_image)
+    #cv.imshow('inverted', cv.bitwise_not(check_image))
+
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
+
+    # Find all the white pixels in the image
     white_pixels = cv.findNonZero(cv.bitwise_not(check_image))
 
     results = []
     points = []
-    distance = []
+
+    # Done TODO Loop through and find all points that are not in a line yet
+    # TODO Create a loop to form a line
+    # TODO Form a trend out of all the points currently in the line
+    # TODO Create a function that decides whether the point is within the trend
+    # TODO If the point is in the trend, remove the point from the image and add it to the line
+    # TODO Then add the line to the rest of the lines
+    # print("This is len white: " + str(len(white_pixels)))
+
+
+    # Put all white points in an array along with their distance to home point
+
+    i = 0
 
     for i in range(0, len(white_pixels)):
 
-        distance = distanceBetween(white_pixels[i], home_pixel)
-        print(distance)
+        # print("Taking off: " + str(white_pixels[i][0]))
+        distance = distanceBetween(white_pixels[i][0], home_pixel)
+        #print(distance)
 
-        points.append(white_pixels[i])
-        distance.append(distance)
+        points.append((distance, white_pixels[i][0]))
+
+
+        i = i + 1
+
+    # Sort the list with respect to distance to home pixel
+    sorted_points = sorted(points, key=lambda point1: point1[0])
+
+    # print("Home Point: ")
+    # print(home_pixel)
+    # for point in sorted_points:
+    #     print("This is distance: " + str(point[0]) + ", Point: " + str(point[1][0]) + ", " + str(point[1][1]))
+    #
+
+    # Swap the list to allow pop()
+    sorted_points.reverse()
+
+    print("This is the sorted_point length: " + str(len(sorted_points)) )
+
+    # Pull the first point off the array, and start forming a line
+    point_1 = sorted_points.pop()
+
+    x = [home_pixel[0], point_1[1][0]] # List of all the x's of the points
+    y = [home_pixel[0], point_1[1][1]] # List of all the y's of the points
+
+    print("X: " + str(x))
+    print("Y: " + str(y))
+
+    # Create the first polynomial
+    first_poly = np.polyfit(x,y, 2)
+
+    print(first_poly)
+    print("This is the sorted_point length: " + str(len(sorted_points)) )
+
+    line = [] # List of points representing the line
+
+    line.append(home_pixel)
+    line.append(point_1)
+
+    looping = True
+    looped = 0
+
+    while looping and sorted_points:
+
+        # Keep pulling points off the sorted list until points no longer match
+        popped_point = sorted_points.pop()
+        popped_x = popped_point[1][0]
+        popped_y = popped_point[1][1]
+
+            
+
+    exit(0)
+    return return_image
 
 # readLines()
-# Find the lines in the image and pass them back as an array
-# Input: test_image: A black and white image representing the image to be drawn
+# Find the lines in the image and pass them back as an array,
+# Input: test_image: A GRAYSCALE image representing the image to be drawn
 # Output: An array of lines to pass through the slicer function
 def readlines(test_image):
-    worked_image = test_image
 
-    shape = test_image.shape
-    width = shape[0]
-    height = shape[1]
+    # Convert image to grayscale just to be sure
+    worked_image = cv.cvtColor(test_image, cv.COLOR_BGR2GRAY)
+
+    print(worked_image.shape)
+    # Image specs
+    shape = worked_image.shape
+    width = shape[1]
+    height = shape[0]
 
     i = 0
     j = 0
 
     while i in range(0, width - 1):
+
+        i = i + 1
         j = 0
-        i += 1
+
+
         while j in range(0, height - 1):
+            j = j + 1
 
-
+            print("This is i,j " + str(i) + ", " + str(j))
             pixel = worked_image[i, j]
 
-            print(pixel)
+            if pixel == 0:
 
-            if pixel is 0:
                 print("Got one")
-
-                worked_image = findNear(worked_image, pixel)
+                lol = findNear(worked_image, i, j, 3)
 
                 # This means we have a black pixel
                 # Search for nearby black pixels
@@ -117,7 +201,7 @@ def readlines(test_image):
                 None
 
 
-            j += 1
+
 
     # An array
     lines = []
