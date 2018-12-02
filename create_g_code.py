@@ -60,16 +60,43 @@ def distanceBetween(pixel_1, pixel_2):
     # print("Pixel: " + str(pixel_1[0]) + " , " + str(pixel_1[1]))
     return math.sqrt((pixel_1[0] - pixel_2[0])**2 + (pixel_1[1] - pixel_2[1])**2)
 
+# distancePointLine()
+# Return the distance between a point and a line
+# Input: A point
+# Input: Line: An array representing the factors of the line equation
+def distancePointLine(point, line):
+
+    x = point[0]
+    y = point[1]
+
+    slope = line[0]
+    y_int = line[1]
+
+    inv_slope = (-1)*(1/slope)
+
+    # Convert from y = mx+b
+
+
+    a = -slope
+    b = 1
+    c = -y_int
+
+    distance = ((abs(a * x + b * y + c))/ math.sqrt(a**2 + b**2))
+
+    return distance
 
 # findNear()
 # Find nearby black pixels to take
 # Input: Image to check for nearby pixels
 # x, y coordinate of the pixel
-
 def findNear(check_image, x, y, fit):
 
     # The image to return
-    return_image = check_image
+    return_image = np.copy(check_image)
+
+    shape = check_image.shape
+    width = shape[1]
+    height = shape[0]
 
     # The original pixel of the line
     home_pixel = [x, y]
@@ -81,7 +108,7 @@ def findNear(check_image, x, y, fit):
     #cv.destroyAllWindows()
 
     # Find all the white pixels in the image
-    white_pixels = cv.findNonZero(cv.bitwise_not(check_image))
+    white_pixels = cv.findNonZero(check_image)
 
     results = []
     points = []
@@ -107,7 +134,6 @@ def findNear(check_image, x, y, fit):
 
         points.append((distance, white_pixels[i][0]))
 
-
         i = i + 1
 
     # Sort the list with respect to distance to home pixel
@@ -122,7 +148,7 @@ def findNear(check_image, x, y, fit):
     # Swap the list to allow pop()
     sorted_points.reverse()
 
-    print("This is the sorted_point length: " + str(len(sorted_points)) )
+    # print("This is the sorted_point length: " + str(len(sorted_points)) )
 
     # Pull the first point off the array, and start forming a line
     point_1 = sorted_points.pop()
@@ -130,14 +156,11 @@ def findNear(check_image, x, y, fit):
     x = [home_pixel[0], point_1[1][0]] # List of all the x's of the points
     y = [home_pixel[0], point_1[1][1]] # List of all the y's of the points
 
-    print("X: " + str(x))
-    print("Y: " + str(y))
-
     # Create the first polynomial
-    first_poly = np.polyfit(x,y, 2)
+    first_poly = np.polyfit(x, y, 1)
 
-    print(first_poly)
-    print("This is the sorted_point length: " + str(len(sorted_points)) )
+    # print(first_poly)
+    # print("This is the sorted_point length: " + str(len(sorted_points)) )
 
     line = [] # List of points representing the line
 
@@ -150,14 +173,30 @@ def findNear(check_image, x, y, fit):
     while looping and sorted_points:
 
         # Keep pulling points off the sorted list until points no longer match
-        popped_point = sorted_points.pop()
-        popped_x = popped_point[1][0]
-        popped_y = popped_point[1][1]
+        popped_point = sorted_points.pop()[1]
 
-            
+        distance_to_line = distancePointLine(popped_point,first_poly)
 
-    exit(0)
-    return return_image
+        print("This is the calculated distance: " + str(distance_to_line))
+
+        if distance_to_line <= fit and popped_point[1] < width and popped_point[0] < height:
+
+            return_image[popped_point[1], popped_point[0]] = 0
+
+            # Make the pixel white and add it to the line
+            line.append(popped_point)
+            x.append(popped_point[0])
+            y.append(popped_point[1])
+            first_poly = np.polyfit(x, y, 1)
+
+    print(str(len(line)))
+    cv.imshow('original', check_image)
+    cv.imshow('modified', return_image)
+
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    exit()
+    return return_image, line
 
 # readLines()
 # Find the lines in the image and pass them back as an array,
@@ -192,7 +231,8 @@ def readlines(test_image):
             if pixel == 0:
 
                 print("Got one")
-                lol = findNear(worked_image, i, j, 3)
+
+                lol = findNear(cv.bitwise_not(worked_image), i, j, 3)
 
                 # This means we have a black pixel
                 # Search for nearby black pixels
