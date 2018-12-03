@@ -134,8 +134,8 @@ def findNear(check_image, x, y, fit):
     point_1 = sorted_points.pop()
 
     # Start arrays of x's and y's
-    x = [home_pixel[0], point_1[1][0]] # List of all the x's of the points
-    y = [home_pixel[0], point_1[1][1]] # List of all the y's of the points
+    x = [home_pixel[1], point_1[1][1]] # List of all the x's of the points
+    y = [home_pixel[0], point_1[1][0]] # List of all the y's of the points
 
     # Create the first polynomial
     first_poly = np.polyfit(x, y, 1)
@@ -158,9 +158,10 @@ def findNear(check_image, x, y, fit):
         print("This is the calculated distance: " + str(distance_to_line))
 
         fit = 5
-        if distance_to_line <= fit and popped_point[1] < width and popped_point[0] < height:
 
-            return_image[popped_point[1], popped_point[0]] = 0
+        if distance_to_line <= fit:
+
+            return_image[popped_point[1], popped_point[0]] = 100
 
             # Make the pixel white and add it to the line
             line.append(popped_point)
@@ -175,8 +176,7 @@ def findNear(check_image, x, y, fit):
     cv.waitKey(0)
     cv.destroyAllWindows()
 
-    exit()
-    return return_image, line
+    return line, return_image
 
 # readLines()
 # Find the lines in the image and pass them back as an array,
@@ -200,8 +200,6 @@ def readlines(test_image):
 
     arrayLines = []
 
-    endLoop = False
-
     i = 0
 
     # Iterate through the entire image to find all the white pixels
@@ -214,10 +212,10 @@ def readlines(test_image):
 
             j = j + 1
 
-            pixel = worked_image[i, j]
+            pixel = inv_image[i, j]
 
-            # Pixel is black
-            if pixel == 0:
+            # Pixel is white
+            if pixel == 255:
                 # This means we have a black pixel
                 # Search for nearby black pixels
 
