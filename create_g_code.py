@@ -77,7 +77,7 @@ def distancePointLine(point, line):
     # Convert from y = mx+b
 
 
-    a = -slope
+    a = - slope
     b = 1
     c = -y_int
 
@@ -96,12 +96,10 @@ def findNear(check_image, x, y, fit):
 
     # The specifications of the image
     shape = check_image.shape
-    width = shape[1]
-    height = shape[0]
+    width = shape[1] # The horizontal pixel length
+    height = shape[0] # The vertical pixel length
 
-    print("This is the size of the image: " + str(shape))
-
-    # The original pixel of the line
+    # The original pixel passed into the function
     home_pixel = [x, y]
 
     # Find all the white pixels in the image
@@ -155,10 +153,11 @@ def findNear(check_image, x, y, fit):
         # Keep pulling points off the sorted list until points no longer match
         popped_point = sorted_points.pop()[1]
 
-        distance_to_line = distancePointLine(popped_point,first_poly)
+        distance_to_line = distancePointLine(popped_point, first_poly)
 
         print("This is the calculated distance: " + str(distance_to_line))
 
+        fit = 5
         if distance_to_line <= fit and popped_point[1] < width and popped_point[0] < height:
 
             return_image[popped_point[1], popped_point[0]] = 0
@@ -175,7 +174,7 @@ def findNear(check_image, x, y, fit):
 
     cv.waitKey(0)
     cv.destroyAllWindows()
-    
+
     exit()
     return return_image, line
 
@@ -188,46 +187,47 @@ def readlines(test_image):
     # Convert image to grayscale just to be sure
     worked_image = cv.cvtColor(test_image, cv.COLOR_BGR2GRAY)
 
+    # Print the shape of the image
     print(worked_image.shape)
+
     # Image specs
     shape = worked_image.shape
-    width = shape[1]
-    height = shape[0]
+    width = shape[1] # The number of horizontal pixels
+    height = shape[0] # The number of vertical pixels
+
+    # Invert the image to make the lines white pixels
+    inv_image = cv.bitwise_not(worked_image)
+
+    arrayLines = []
+
+    endLoop = False
 
     i = 0
-    j = 0
 
-    while i in range(0, width - 1):
+    # Iterate through the entire image to find all the white pixels
+    while i in range(0, width):
 
         i = i + 1
         j = 0
 
+        while j in range(0, height):
 
-        while j in range(0, height - 1):
             j = j + 1
 
-            print("This is i,j " + str(i) + ", " + str(j))
             pixel = worked_image[i, j]
 
+            # Pixel is black
             if pixel == 0:
-
-                print("Got one")
-
-                lol = findNear(cv.bitwise_not(worked_image), i, j, 3)
-
                 # This means we have a black pixel
                 # Search for nearby black pixels
-            else:
-                # This means we have a white pixel, so do nothing
-                None
 
+                # Analyze the lines around the pixel
+                lines, inv_image = findNear(inv_image, i, j, 3)
 
+                # Add the line to the rest of the lines
+                arrayLines.append(lines)
 
-
-    # An array
-    lines = []
-
-    return containsPixels(worked_image)
+    return arrayLines
 
 
 # image_to_gcode
@@ -308,14 +308,15 @@ def writeConclusion(file):
     #
     None
 
+# Loading test images
+test_image = process_image.openImage('slicer_test_1.png') # A real test image
+black_image = np.zeros((test_image.shape[0],test_image.shape[1]), dtype=np.uint8) # A black test image
+blank_image = np.ones((test_image.shape[0],test_image.shape[1]), dtype=np.uint8) * 255 # A white test image
 
-test_image = process_image.openImage('slicer_test_1.png')
-black_image = np.zeros((test_image.shape[0],test_image.shape[1]), dtype=np.uint8)
-blank_image = np.ones((test_image.shape[0],test_image.shape[1]), dtype=np.uint8) * 255
-
-
+# Select which image to run
 run_image = test_image
 
+# Run the line-pathing algorithm
 print(str(readlines(run_image)))
 
 cv.imshow('original', run_image)
