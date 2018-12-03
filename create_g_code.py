@@ -94,23 +94,20 @@ def findNear(check_image, x, y, fit):
     # The image to return
     return_image = np.copy(check_image)
 
+    # The specifications of the image
     shape = check_image.shape
     width = shape[1]
     height = shape[0]
 
+    print("This is the size of the image: " + str(shape))
+
     # The original pixel of the line
     home_pixel = [x, y]
-
-    #cv.imshow('lol', check_image)
-    #cv.imshow('inverted', cv.bitwise_not(check_image))
-
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
 
     # Find all the white pixels in the image
     white_pixels = cv.findNonZero(check_image)
 
-    results = []
+    # An array of tuples containing (distance to home pixel, point[x,y])
     points = []
 
     # Done TODO Loop through and find all points that are not in a line yet
@@ -119,56 +116,39 @@ def findNear(check_image, x, y, fit):
     # TODO Create a function that decides whether the point is within the trend
     # TODO If the point is in the trend, remove the point from the image and add it to the line
     # TODO Then add the line to the rest of the lines
-    # print("This is len white: " + str(len(white_pixels)))
-
 
     # Put all white points in an array along with their distance to home point
-
-    i = 0
-
-    for i in range(0, len(white_pixels)):
-
-        # print("Taking off: " + str(white_pixels[i][0]))
-        distance = distanceBetween(white_pixels[i][0], home_pixel)
-        #print(distance)
-
-        points.append((distance, white_pixels[i][0]))
-
-        i = i + 1
+    for pixel in white_pixels:
+        distance = distanceBetween(pixel[0], home_pixel)
+        points.append((distance, pixel[0]))
 
     # Sort the list with respect to distance to home pixel
     sorted_points = sorted(points, key=lambda point1: point1[0])
 
-    # print("Home Point: ")
-    # print(home_pixel)
+    # To print all the points in an array
     # for point in sorted_points:
     #     print("This is distance: " + str(point[0]) + ", Point: " + str(point[1][0]) + ", " + str(point[1][1]))
-    #
 
     # Swap the list to allow pop()
     sorted_points.reverse()
 
-    # print("This is the sorted_point length: " + str(len(sorted_points)) )
-
     # Pull the first point off the array, and start forming a line
     point_1 = sorted_points.pop()
 
+    # Start arrays of x's and y's
     x = [home_pixel[0], point_1[1][0]] # List of all the x's of the points
     y = [home_pixel[0], point_1[1][1]] # List of all the y's of the points
 
     # Create the first polynomial
     first_poly = np.polyfit(x, y, 1)
 
-    # print(first_poly)
-    # print("This is the sorted_point length: " + str(len(sorted_points)) )
-
     line = [] # List of points representing the line
 
+    # Add the first two points
     line.append(home_pixel)
     line.append(point_1)
 
     looping = True
-    looped = 0
 
     while looping and sorted_points:
 
@@ -195,6 +175,7 @@ def findNear(check_image, x, y, fit):
 
     cv.waitKey(0)
     cv.destroyAllWindows()
+    
     exit()
     return return_image, line
 
