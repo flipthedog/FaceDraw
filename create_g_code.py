@@ -1,9 +1,6 @@
 # Creating the g-code
 
 # Imports
-import sys
-import sysconfig
-import time
 import math
 
 # Image processing imports
@@ -14,12 +11,12 @@ import _datetime
 import cv2 as cv
 
 
-
 # containsPixels()
 # Look through the image to see if there are still lines to be found
 # Input: check_image: A black and white image to check
 # Output: Boolean value representing whether the image still contains pixels
 def containsPixels(check_image):
+
     shape = check_image.shape
 
     width = shape[0]
@@ -53,12 +50,14 @@ def containsPixels(check_image):
     #         j = j + 1
     #         print(str(check_image.item(i, j, 2)))
 
+
 # distanceBetween()
 # Find the distance between two pixels
 def distanceBetween(pixel_1, pixel_2):
 
     # print("Pixel: " + str(pixel_1[0]) + " , " + str(pixel_1[1]))
     return math.sqrt((pixel_1[0] - pixel_2[0])**2 + (pixel_1[1] - pixel_2[1])**2)
+
 
 # distancePointLine()
 # Return the distance between a point and a line
@@ -72,12 +71,13 @@ def distancePointLine(point, line):
     slope = line[0]
     y_int = line[1]
 
-    inv_slope = (-1)*(1/slope)
+    if not (slope == 0):
+        inv_slope = (-1)*(1/slope)
 
     # Convert from y = mx+b
 
 
-    a = - slope
+    a = -inv_slope
     b = 1
     c = -y_int
 
@@ -96,8 +96,8 @@ def findNear(check_image, x, y, fit):
 
     # The specifications of the image
     shape = check_image.shape
-    width = shape[1] # The horizontal pixel length
-    height = shape[0] # The vertical pixel length
+    width = shape[0] # The horizontal pixel length
+    height = shape[1] # The vertical pixel length
 
     # The original pixel passed into the function
     home_pixel = [x, y]
@@ -134,8 +134,8 @@ def findNear(check_image, x, y, fit):
     point_1 = sorted_points.pop()
 
     # Start arrays of x's and y's
-    x = [home_pixel[1], point_1[1][1]] # List of all the x's of the points
-    y = [home_pixel[0], point_1[1][0]] # List of all the y's of the points
+    x = [home_pixel[0], point_1[1][0]] # List of all the x's of the points
+    y = [home_pixel[1], point_1[1][1]] # List of all the y's of the points
 
     # Create the first polynomial
     first_poly = np.polyfit(x, y, 1)
@@ -155,13 +155,13 @@ def findNear(check_image, x, y, fit):
 
         distance_to_line = distancePointLine(popped_point, first_poly)
 
-        print("This is the calculated distance: " + str(distance_to_line))
+        # print("This is the calculated distance: " + str(distance_to_line))
 
         fit = 5
 
         if distance_to_line <= fit:
 
-            return_image[popped_point[1], popped_point[0]] = 100
+            return_image[popped_point[0], popped_point[1]] = 100
 
             # Make the pixel white and add it to the line
             line.append(popped_point)
@@ -169,12 +169,11 @@ def findNear(check_image, x, y, fit):
             y.append(popped_point[1])
             first_poly = np.polyfit(x, y, 1)
 
-    print(str(len(line)))
+    # print(str(len(line)))
     cv.imshow('original', check_image)
     cv.imshow('modified', return_image)
 
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    cv.waitKey(2)
 
     return line, return_image
 
@@ -192,8 +191,10 @@ def readlines(test_image):
 
     # Image specs
     shape = worked_image.shape
-    width = shape[1] # The number of horizontal pixels
-    height = shape[0] # The number of vertical pixels
+    height = shape[0] # The number of horizontal pixels
+    width = shape[1] # The number of vertical pixels
+
+    print("This is the width, height: " + str(width) + ", " + str(height))
 
     # Invert the image to make the lines white pixels
     inv_image = cv.bitwise_not(worked_image)
@@ -220,6 +221,8 @@ def readlines(test_image):
                 # Search for nearby black pixels
 
                 # Analyze the lines around the pixel
+                # i represents the width (x)
+                # j represents the height (y)
                 lines, inv_image = findNear(inv_image, i, j, 3)
 
                 # Add the line to the rest of the lines
@@ -234,7 +237,7 @@ def readlines(test_image):
 # Input: raster: Boolean, whether to raster or not
 # Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
-def image_to_gcode(image, linewidth, raster, filename):
+def image_to_gcode(filename, image=None, linewidth=None, raster=None ):
 
     # Check for file existence and overwrite if necessary
     try:
@@ -249,7 +252,8 @@ def image_to_gcode(image, linewidth, raster, filename):
         file = open(str(filename), 'w+x')
 
     writeIntroduction(file)
-    writeBody(file, image, linewidth)
+    linetogcode(file)
+    #writeBody(file, image, linewidth)
     writeConclusion(file)
 
     # cv.imshow("This image", image)
@@ -303,8 +307,37 @@ def writeBody(file, image, linewidth):
 # Input: file: the
 def writeConclusion(file):
     # TODO write the conclusion of this
-    #
+
+    file.write("\n; That is all for now")
+    file.write("\n; Find FaceDraw on: http:/github.com/flipthedog/facedraw")
+    file.write("\n")
+    file.write("; Thanks")
+
     None
+
+
+# linetogcode()
+# Convert an array of points to G-code moves
+# Input: file: The file to write the text to
+# Input: max_width: The maximum width to move in
+# Input: max_height: The maximum height to move in
+# Input: z_hop: The height to hop in between draw moves
+# Input: lines: An array of lines to be drawn
+# Output: None
+def linetogcode(file, max_width, max_height, z_hop, lines):
+    # Assumptions: All the points are in order representing a path
+
+    # Iterate through all the lines to draw
+    for line in lines:
+
+        # Iterate through all the points in the line
+        for point in line:
+            # Point = (height, width)
+            x = point[1]
+            y = point[0]
+
+            
+
 
 # Loading test images
 test_image = process_image.openImage('slicer_test_1.png') # A real test image
@@ -315,11 +348,6 @@ blank_image = np.ones((test_image.shape[0],test_image.shape[1]), dtype=np.uint8)
 run_image = test_image
 
 # Run the line-pathing algorithm
-print(str(readlines(run_image)))
-
-cv.imshow('original', run_image)
-# cv.imshow('final', final_image)
-cv.waitKey(0)
-cv.destroyAllWindows()
+# print(str(readlines(run_image)))
 
 
