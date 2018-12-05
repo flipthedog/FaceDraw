@@ -1,5 +1,3 @@
-./idea/
-./idea
-test_frame.py
-test_frame_2.py
+.idea
 GCode/JapanTest.gcode
+*/__pycache__/

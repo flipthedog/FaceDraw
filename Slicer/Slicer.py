@@ -11,7 +11,7 @@ import cv2 as cv
 # Slicer Class
 class Slicer:
 
-    def __init__(self, image):
+    def __init__(self, image, feedrate, z_hop=None, z_tune=None):
         # The image to be processed
         self.original_image = image
 
@@ -19,6 +19,21 @@ class Slicer:
         shape = image.shape
         self.image_width = shape[1] # Horizontal pixel no.
         self.image_height = shape[0] # Vertical pixel no.
+
+        # User specified settings
+        # Vertical distance (mm) to z-hop
+        if z_hop == None:
+            self.z_hop = 0.3
+        else:
+            self.z_hop = z_hop
+
+        # Vertical adjustment (mm)
+        if z_tune == None:
+            self.z_tune = 0
+        else:
+            self.z_tune = z_tune
+
+        self.feedrate = feedrate
 
     # containsPixels()
     # Look through the image to see if there are still lines to be found
@@ -69,6 +84,8 @@ class Slicer:
 
         if not (slope == 0):
             inv_slope = (-1) * (1 / slope)
+        else:
+            inv_slope = 0
 
         # Convert from y = mx+b
 
@@ -155,7 +172,7 @@ class Slicer:
             fit = 5
 
             if distance_to_line <= fit:
-                return_image[popped_point[0], popped_point[1]] = 100
+                return_image[popped_point[1], popped_point[0]] = 100
 
                 # Make the pixel white and add it to the line
                 line.append(popped_point)
@@ -175,7 +192,10 @@ class Slicer:
     # Find the lines in the image and pass them back as an array,
     # Input: test_image: A GRAYSCALE image representing the image to be drawn
     # Output: An array of lines to pass through the slicer function
-    def readlines(self, test_image):
+    def readlines(self, test_image=None):
+
+        if test_image == None:
+            test_image = self.original_image
 
         # Convert image to grayscale just to be sure
         worked_image = cv.cvtColor(test_image, cv.COLOR_BGR2GRAY)
@@ -258,7 +278,7 @@ class Slicer:
     # writeIntroduction()
     # Write the introduction and settings of the G-code file
     # Input: file: The file to write the introduction to
-    def writeIntroduction(file):
+    def writeIntroduction(self, file):
         # TODO Write the settings to the file
         today = str(_datetime.datetime.today())
         file.write("; Created by FaceDraw on: " + str(today))
@@ -273,7 +293,7 @@ class Slicer:
     # Input: image: The image to write the G-code from
     # Input: linewidth: The width of the pen-drawing
     # Default: 0.3 mm
-    def writeBody(file, image, linewidth):
+    def writeBody(self, file, image, linewidth):
         # TODO Write the G-code writing functions
 
         if linewidth is None:
@@ -296,7 +316,7 @@ class Slicer:
     # writeConclusion()
     # Write the conclusion of the file
     # Input: file: the
-    def writeConclusion(file):
+    def writeConclusion(self, file):
         # TODO write the conclusion of this
 
         file.write("\n; That is all for now")
@@ -314,14 +334,44 @@ class Slicer:
     # Input: z_hop: The height to hop in between draw moves
     # Input: lines: An array of lines to be drawn
     # Output: None
-    def linetogcode(file, max_width, max_height, image_width, image_height, z_hop, lines):
+    def linetogcode(self, file, max_width, max_height, image_width, image_height, lines):
         # Assumptions: All the points are in order representing a path
+
+        # Convert to bed coordinates
+        width_ratio = max_width / image_width
+        height_ratio = max_height / image_height
 
         # Iterate through all the lines to draw
         for line in lines:
 
+            # Move to the new position, set feedrate
+            first_point = line[0]
+
+            g_code_x = first_point[0] * width_ratio
+            g_code_y = first_point[1] * height_ratio
+            g_code_z = self.z_tune
+
+            file.write("G1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(g_code_z)+ " F" + str(self.feedrate))
+
+            # Put down the head
+            file.write("G1 " + "Z" + str(self.z_tune) + " ; Move down the toolhead")
+
             # Iterate through all the points in the line
             for point in line:
+
                 # Point = (height, width)
                 x = point[0]
                 y = point[1]
+
+                # The G-code position
+                g_code_x = x * width_ratio
+                g_code_y = y * height_ratio
+                g_code_z = self.z_tune
+
+                file.write("G1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(g_code_z))
+
+            g_code_z = self.z_tune + self.z_hop
+
+            file.write("G1 " + "Z" + str(g_code_z) + " ; Move up the toolhead")
+
+        file.write("; Done drawing lines")

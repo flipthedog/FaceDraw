@@ -1,4 +1,4 @@
-import process_image
+from ImageProcessing import process_image
 import cv2 as cv
 
 cv_image = process_image.openImage("floris_2.png")

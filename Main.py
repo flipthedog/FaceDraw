@@ -1,15 +1,12 @@
 # The main file of the facedraw program
-import process_image
-import create_g_code
+from ImageProcessing import process_image
 import cv2 as cv
 
 import os
 
-import time
 import tkinter
 from tkinter import filedialog
 from tkinter import Label
-import PIL
 from PIL import Image
 from PIL import ImageTk
 
