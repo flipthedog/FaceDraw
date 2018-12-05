@@ -2,11 +2,8 @@
 
 # Imports
 import math
-
-# Image processing imports
-import process_image
+from ImageProcessing import process_image
 import numpy as np
-from numpy import sum
 import _datetime
 import cv2 as cv
 
@@ -324,7 +321,7 @@ def writeConclusion(file):
 # Input: z_hop: The height to hop in between draw moves
 # Input: lines: An array of lines to be drawn
 # Output: None
-def linetogcode(file, max_width, max_height, z_hop, lines):
+def linetogcode(file, max_width, max_height, image_width, image_height, z_hop, lines):
     # Assumptions: All the points are in order representing a path
 
     # Iterate through all the lines to draw
@@ -333,10 +330,10 @@ def linetogcode(file, max_width, max_height, z_hop, lines):
         # Iterate through all the points in the line
         for point in line:
             # Point = (height, width)
-            x = point[1]
-            y = point[0]
+            x = point[0]
+            y = point[1]
 
-            
+
 
 
 # Loading test images

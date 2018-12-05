@@ -1,4 +1,5 @@
-././idea
+./idea/
 ./idea
-idea
-/idea
+test_frame.py
+test_frame_2.py
+GCode/JapanTest.gcode
