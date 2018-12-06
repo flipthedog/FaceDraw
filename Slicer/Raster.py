@@ -11,7 +11,7 @@ class Raster():
 
     def __init__(self, image, feedrate, bed_size, line_width, z_hop=None, z_tune=None):
         # The image to be processed
-        self.original_image = image
+        self.original_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
         # Bed specifications
         self.max_width = bed_size[0]
@@ -55,14 +55,20 @@ class Raster():
         draw_arr = [[0 for x in range(number_cells_width)] for y in range(number_cells_height)]
 
         # Where the pixels to draw are
-        white_pixels = cv.findNonZero(cv.bitwise_not(self.original_image))
+        inv_image = cv.bitwise_not(self.original_image)
+        white_pixels = cv.findNonZero(inv_image)
 
         # Change draw_arr depending on image pixels
-        for pixel in white_pixels:
+        for pixel2 in white_pixels:
+            pixel = pixel2[0]
 
             # Transform from image space to draw_Arr space
             pixel_width_pos = pixel[1]
             pixel_height_pos = pixel[0]
+
+            print(self.max_height)
+            print(pixel_height_pos)
+            exit()
 
             cell_pixel_width = math.floor((pixel_width_pos / self.max_width) * number_cells_width)
             cell_pixel_height = math.floor((pixel_height_pos / self.max_height) * number_cells_height)

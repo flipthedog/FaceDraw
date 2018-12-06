@@ -2,6 +2,7 @@ from Slicer import create_g_code
 from Slicer import Slicer
 from Slicer import Raster
 from ImageProcessing import process_image
+import cv2 as cv
 
 cv_image = process_image.openImage('slicer_test_1.png')
 # gray_image = process_image.grayImage(cv_image)
@@ -18,6 +19,11 @@ cv_image = process_image.openImage('slicer_test_1.png')
 # cv.destroyAllWindows()
 
 # Set bed size to 300mm x 300mm
+
+cv.imshow('hello', cv_image)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
 bed_size = [300, 300]
 raster = Raster.Raster(cv_image, 300, bed_size, 0.3)
 raster.raster()
