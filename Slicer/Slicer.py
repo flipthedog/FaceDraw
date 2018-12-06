@@ -11,9 +11,13 @@ import cv2 as cv
 # Slicer Class
 class Slicer:
 
-    def __init__(self, image, feedrate, z_hop=None, z_tune=None):
+    def __init__(self, image, feedrate, bed_size, z_hop=None, z_tune=None):
         # The image to be processed
         self.original_image = image
+
+        # Bed specifications
+        self.max_width = bed_size[0]
+        self.max_height = bed_size[1]
 
         # Image specifications
         shape = image.shape
@@ -62,9 +66,9 @@ class Slicer:
     # Input: pixel_1[width, height]
     # Input: pixel_2[width, height]
     # Output: Number representing the distance
-    def distanceBetween(self, pixel_1, pixel_2, print=False):
+    def distanceBetween(self, pixel_1, pixel_2, printout=False):
 
-        if print:
+        if printout:
             # Print out the two pixels
             print("Pixel: " + str(pixel_1[0]) + " , " + str(pixel_1[1]))
 
@@ -89,13 +93,39 @@ class Slicer:
 
         # Convert from y = mx+b
 
-        a = -inv_slope
+        a = - slope
         b = 1
-        c = -y_int
+        c = - y_int
 
         distance = ((abs(a * x + b * y + c)) / math.sqrt(a ** 2 + b ** 2))
 
         return distance
+
+    # distanceclosestpoint()
+    # Find the closest point to the line of best fit
+    # Input: line_points: An array of points in the line of best fit
+    # Input: point: The point to be checked
+    # Output: boolean: Whether the point is close enough to the line of best fit
+    def distanceclosestpoint(self, line_points, point, fit):
+
+        # The minimum distance to the point
+        min_distance = 9999999
+
+        # Iterate through the line to find the shortest distance to the point
+        for fit_point in line_points:
+
+            distance = self.distanceBetween(fit_point, point)
+
+            if distance <= min_distance:
+                min_distance = distance
+
+        if distance <= fit:
+
+            # The distance is close, point is valid, return True
+            return True
+
+        # The distance is too far, point is not valid, return False
+        return False
 
     # findNear()
     # Find nearby black pixels to take
@@ -105,11 +135,6 @@ class Slicer:
 
         # The image to return
         return_image = np.copy(check_image)
-
-        # The specifications of the image
-        shape = check_image.shape
-        width = shape[0]  # The horizontal pixel length
-        height = shape[1]  # The vertical pixel length
 
         # The original pixel passed into the function
         home_pixel = [x, y]
@@ -143,11 +168,11 @@ class Slicer:
         sorted_points.reverse()
 
         # Pull the first point off the array, and start forming a line
-        point_1 = sorted_points.pop()
+        point_1 = sorted_points.pop()[1]
 
         # Start arrays of x's and y's
-        x = [home_pixel[0], point_1[1][0]]  # List of all the x's of the points
-        y = [home_pixel[1], point_1[1][1]]  # List of all the y's of the points
+        x = [home_pixel[0], point_1[0]]  # List of all the x's of the points
+        y = [home_pixel[1], point_1[1]]  # List of all the y's of the points
 
         # Create the first polynomial
         first_poly = np.polyfit(x, y, 1)
@@ -170,8 +195,12 @@ class Slicer:
             # print("This is the calculated distance: " + str(distance_to_line))
 
             fit = 5
+            fit2 = 100
 
-            if distance_to_line <= fit:
+            close_enough = self.distanceclosestpoint(line, popped_point, fit2)
+
+            if distance_to_line <= fit and close_enough:
+
                 return_image[popped_point[1], popped_point[0]] = 100
 
                 # Make the pixel white and add it to the line
@@ -180,11 +209,10 @@ class Slicer:
                 y.append(popped_point[1])
                 first_poly = np.polyfit(x, y, 1)
 
-        # print(str(len(line)))
+        print(str(len(line)))
         cv.imshow('original', check_image)
         cv.imshow('modified', return_image)
-
-        cv.waitKey(2)
+        cv.waitKey(0)
 
         return line, return_image
 
@@ -334,12 +362,12 @@ class Slicer:
     # Input: z_hop: The height to hop in between draw moves
     # Input: lines: An array of lines to be drawn
     # Output: None
-    def linetogcode(self, file, max_width, max_height, image_width, image_height, lines):
+    def linetogcode(self, file, lines):
         # Assumptions: All the points are in order representing a path
 
         # Convert to bed coordinates
-        width_ratio = max_width / image_width
-        height_ratio = max_height / image_height
+        width_ratio = self.max_width / self.image_width
+        height_ratio = self.max_height / self.image_height
 
         # Iterate through all the lines to draw
         for line in lines:
