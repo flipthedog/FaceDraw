@@ -2,6 +2,8 @@ from Slicer import create_g_code
 from Slicer import Slicer
 from Slicer import Raster
 from ImageProcessing import process_image
+from Slicer import Writer
+
 import cv2 as cv
 
 cv_image = process_image.openImage('slicer_test_1.png')
@@ -26,4 +28,6 @@ cv.destroyAllWindows()
 
 bed_size = [300, 300]
 raster = Raster.Raster(cv_image, 300, bed_size, 0.3)
-raster.raster()
+lines = raster.raster()
+
+Writer.image_to_gcode("raster_test_1.gcode", lines, raster.max_width, raster.max_height, raster.image_width, raster.image_height)

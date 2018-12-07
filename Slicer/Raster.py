@@ -51,6 +51,8 @@ class Raster():
         number_cells_width = math.floor(self.max_width / self.line_width)
         number_cells_height = math.floor(self.max_height / self.line_width)
 
+        print("These are the dimensions of the array: " + str(number_cells_width) + ", " + str(number_cells_height))
+
         # Define a two dimensional array on where to draw
         draw_arr = [[0 for x in range(number_cells_width)] for y in range(number_cells_height)]
 
@@ -66,15 +68,16 @@ class Raster():
             pixel_width_pos = pixel[1]
             pixel_height_pos = pixel[0]
 
-            print(self.max_height)
-            print(pixel_height_pos)
-            exit()
 
-            cell_pixel_width = math.floor((pixel_width_pos / self.max_width) * number_cells_width)
-            cell_pixel_height = math.floor((pixel_height_pos / self.max_height) * number_cells_height)
+
+            cell_pixel_width = math.floor((pixel_width_pos / self.image_height) * number_cells_width)
+            cell_pixel_height = math.floor((pixel_height_pos / self.image_width) * number_cells_height)
+
+            print(cell_pixel_width)
+            print(cell_pixel_height)
 
             # Change draw arr pixel
-            draw_arr[cell_pixel_width, cell_pixel_height] += 1
+            draw_arr[cell_pixel_width][cell_pixel_height] += 1
 
 
         # Array of lines to return
@@ -90,7 +93,7 @@ class Raster():
             for j in range(0, number_cells_height):
 
                 # Determine whether to draw here, otherwise add point to lines after converting
-                if draw_arr[i, j] > 0:
+                if draw_arr[i][j] > 0:
 
                     pixel_width_pos = math.floor((i / number_cells_width) * self.image_width)
                     pixel_height_pos = math.floor((i / number_cells_height) * self.image_height)
@@ -105,3 +108,4 @@ class Raster():
                         previous_pixel = new_pixel
 
         return lines
+
