@@ -9,7 +9,7 @@ import math
 
 class Raster():
 
-    def __init__(self, image, feedrate, bed_size, line_width, z_hop=None, z_tune=None):
+    def __init__(self, image, feedrate, bed_size, line_width = 0.3, z_hop=None, z_tune=None):
         # The image to be processed
         self.original_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
@@ -21,23 +21,6 @@ class Raster():
         shape = image.shape
         self.image_width = shape[1] # Horizontal pixel no.
         self.image_height = shape[0] # Vertical pixel no.
-
-        # User specified settings
-        # Vertical distance (mm) to z-hop
-        if z_hop == None:
-            self.z_hop = 0.3
-        else:
-            self.z_hop = z_hop
-
-        # Vertical adjustment (mm)
-        if z_tune == None:
-            self.z_tune = 0
-        else:
-            self.z_tune = z_tune
-
-        self.feedrate = feedrate
-
-        self.line_width = line_width
 
     # TODO:
     # 1. Create a grid of the image based on line width
@@ -73,8 +56,8 @@ class Raster():
             cell_pixel_width = math.floor((pixel_width_pos / self.image_height) * number_cells_width)
             cell_pixel_height = math.floor((pixel_height_pos / self.image_width) * number_cells_height)
 
-            print(cell_pixel_width)
-            print(cell_pixel_height)
+            #print(cell_pixel_width)
+            #print(cell_pixel_height)
 
             # Change draw arr pixel
             draw_arr[cell_pixel_width][cell_pixel_height] += 1
@@ -84,11 +67,8 @@ class Raster():
         lines = []
 
         # Move from one point in draw_arr to the next
-        i = 0
 
         for i in range(0, number_cells_width):
-
-            j = 0
 
             for j in range(0, number_cells_height):
 
@@ -96,16 +76,9 @@ class Raster():
                 if draw_arr[i][j] > 0:
 
                     pixel_width_pos = math.floor((i / number_cells_width) * self.image_width)
-                    pixel_height_pos = math.floor((i / number_cells_height) * self.image_height)
+                    pixel_height_pos = math.floor((j / number_cells_height) * self.image_height)
 
-                    if len(lines) == 0:
-                        pixel_0 = [0,0]
-                        previous_pixel = [pixel_width_pos, pixel_height_pos]
-                        lines.append([pixel_0, previous_pixel])
-                    else:
-                        new_pixel = [pixel_width_pos, pixel_height_pos]
-                        lines.append([previous_pixel, new_pixel])
-                        previous_pixel = new_pixel
+                    lines.append([pixel_width_pos, pixel_height_pos])
 
         return lines
 

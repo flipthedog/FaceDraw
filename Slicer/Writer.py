@@ -44,7 +44,8 @@ def writeIntroduction( file):
     file.write("\n")
     file.write("; Find FaceDraw on: http:/github.com/flipthedog/facedraw")
     file.write("\n")
-    file.write("; Settings:")
+    file.write("; Settings: \n")
+    file.write("G90")
 
 # writeBody()
 # Write the body, actual g-code to the file
@@ -93,46 +94,33 @@ def writeConclusion( file):
 # Input: z_hop: The height to hop in between draw moves
 # Input: lines: An array of lines to be drawn
 # Output: None
-def linetogcode(file, lines, max_width, max_height, image_width, image_height, z_tune=0, z_hop=0.3, feedrate=300):
+def linetogcode(file, lines, max_width, max_height, image_width, image_height, z_tune=0.0, z_hop=5.0, feedrate=750):
     # Assumptions: All the points are in order representing a path
 
     # Convert to bed coordinates
     width_ratio = max_width / image_width
     height_ratio = max_height / image_height
 
-    file.write("\n; Putting down " + str(len(lines)) + "dots")
+    file.write("\n; Putting down " + str(len(lines)) + " dots")
 
-    # Iterate through all the lines to draw
-    for line in lines:
+    # Iterate through all the points in the line
+    for point in lines:
+        # Point = (height, width)
+        x = point[0]
+        y = point[1]
+        # print("Pulled: X: ", x, "Y: ", y)
 
-        # Move to the new position, set feedrate
-        first_point = line[0]
+        # The G-code position
+        g_code_x = x * width_ratio
+        g_code_y = y * height_ratio
+        g_code_z = z_tune + z_hop
 
-        g_code_x = first_point[0] * width_ratio
-        g_code_y = first_point[1] * height_ratio
-        g_code_z = z_tune
+        file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(g_code_z) + " F" + str(feedrate))
 
-        file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(g_code_z)+ " F" + str(feedrate))
-
-        # Put down the head
-        file.write("\nG1 " + "Z" + str(z_tune) + " ; Move down the toolhead")
-
-        # Iterate through all the points in the line
-        for point in line:
-
-            # Point = (height, width)
-            x = point[0]
-            y = point[1]
-
-            # The G-code position
-            g_code_x = x * width_ratio
-            g_code_y = y * height_ratio
-            g_code_z = z_tune
-
-            file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(g_code_z))
+        file.write("\nG1 " + "Z" + str(z_tune) + " F500 ; Move down the toolhead")
 
         g_code_z = z_tune + z_hop
 
-        file.write("\nG1 " + "Z" + str(g_code_z) + " ; Move up the toolhead")
+        file.write("\nG1 " + "Z" + str(g_code_z) + " F750 ; Move up the toolhead")
 
     file.write("\n; Done drawing lines")

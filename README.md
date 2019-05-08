@@ -1,5 +1,5 @@
 # Face Draw
-Draw your face.
+Draw your face, or something else.
 
 ## Abstract
 A python program that will convert an image to a G-code file that you can run on a 3D printer.
@@ -14,4 +14,4 @@ On the software side this project relies heavily on OpenCV for image processing 
 Still working on getting this to work
 
 # Supported Firmware
-Right now this program will only support the **RepRap firmware** flavor. However, that list will hopefully grow soon.
+Right now this program will only support the **RepRap firmware** flavor. However, that list will grow soon.
