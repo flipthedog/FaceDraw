@@ -2,7 +2,7 @@
 
 import cv2 as cv
 import numpy as np
-import time
+import re
 
 # grayImage
 # Grayscale the color of the image
@@ -44,7 +44,7 @@ def contourImage(gray_image):
 # "regular" or 0: Global thresholding with cv.threshold()
 # "gaussian" or 1: Adaptive mean thresholding with cv.adaptiveThreshold()
 # "mean" or 2: Adaptive gaussian thresholding with cv.adaptiveThreshold()
-def thresholdImage(gray_image, stringType, gaussianSize):
+def thresholdImage(gray_image, stringType, gaussianSize=None):
     if stringType is "regular" or 0:
         ret, thresholdImage = cv.threshold(gray_image, 127, 255, cv.THRESH_BINARY)
     elif stringType is "gaussian" or 1:
@@ -95,9 +95,23 @@ def edgeDetection(gray_image):
 # Input: image_name: the name of the image to be opened
 # Output: The opened image
 def openImage(image_name):
+    image_ext = {'.jpg', '.png', '.gif'}
+
+    flag = False
+
+    for file_app in image_ext:
+
+        if re.search(file_app, image_name):
+            # filename contains file-appendix
+            flag = True
+
+    if flag:
+        pass
+    else:
+        image_name = image_name + '.png'
+
     try:
-        full_image_name = 'images/' + image_name
-        imageToProcess = cv.imread(full_image_name)
+        imageToProcess = cv.imread(r'images/' + image_name)
     except FileNotFoundError:
         print(FileNotFoundError.strerror)
         print("Error: Image not opened")

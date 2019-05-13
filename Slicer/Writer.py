@@ -9,7 +9,7 @@ import _datetime
 # Input: raster: Boolean, whether to raster or not
 # Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
-def image_to_gcode(filename, lines , max_width, max_height, image_width, image_height):
+def image_to_gcode(filename, lines, feedrate, max_width, max_height, image_width, image_height, z_hop=None, z_tune=None):
 
     # Check for file existence and overwrite if necessary
     try:
@@ -25,7 +25,7 @@ def image_to_gcode(filename, lines , max_width, max_height, image_width, image_h
         file = open(str(filename), 'w+x')
 
     writeIntroduction(file)
-    linetogcode(file, lines , max_width, max_height, image_width, image_height)
+    linetogcode(file, lines, max_width, max_height, image_width, image_height, z_tune, z_hop, feedrate)
     # writeBody(file, image, linewidth)
     writeConclusion(file)
 

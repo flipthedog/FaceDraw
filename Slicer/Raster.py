@@ -9,9 +9,11 @@ import math
 
 class Raster():
 
-    def __init__(self, image, feedrate, bed_size, line_width = 0.3, z_hop=None, z_tune=None):
+    def __init__(self, image, feedrate, bed_size, line_width = 0.3):
         # The image to be processed
         self.original_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+
+        self.line_width = line_width
 
         # Bed specifications
         self.max_width = bed_size[0]
