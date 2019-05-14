@@ -39,7 +39,7 @@ cv.imshow('gray_edge', process_image.invertImage(gray_edge_image))
 cv.waitKey(0)
 cv.destroyAllWindows()
 
-raster = Raster.Raster(cv_image, 300, bed_size, 1.0)
+raster = Raster.Raster(cv_image, bed_size, 1.0)
 lines = raster.raster()
 
 Writer.image_to_gcode("raster_1.gcode", lines, feedrate, raster.max_width, raster.max_height, raster.image_width, raster.image_height, z_hop=z_hop, z_tune=z_tune)

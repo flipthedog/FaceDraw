@@ -3,13 +3,12 @@
 # Rasters the image to create a list of tool paths
 
 # Import Statements
-from Slicer import Slicer
 import cv2 as cv
 import math
 
 class Raster():
 
-    def __init__(self, image, feedrate, bed_size, line_width = 0.3):
+    def __init__(self, image, bed_size, line_width = 0.3):
         # The image to be processed
         self.original_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
@@ -21,13 +20,8 @@ class Raster():
 
         # Image specifications
         shape = image.shape
-        self.image_width = shape[1] # Horizontal pixel no.
-        self.image_height = shape[0] # Vertical pixel no.
-
-    # TODO:
-    # 1. Create a grid of the image based on line width
-    # 2. Find out where to put down the marker
-    # 3. Put it in a line
+        self.image_width = shape[1]  # Horizontal pixel no.
+        self.image_height = shape[0]  # Vertical pixel no.
 
     # raster()
     # Create a rastering solution for the image
