@@ -3,6 +3,7 @@
 # Rasters the image to create a list of tool paths
 
 # Import Statements
+from ImageProcessing import process_image
 import cv2 as cv
 import math
 
@@ -36,8 +37,15 @@ class Raster():
         draw_arr = [[0 for x in range(number_cells_width)] for y in range(number_cells_height)]
 
         # Where the pixels to draw are
-        inv_image = cv.bitwise_not(self.original_image)
-        white_pixels = cv.findNonZero(inv_image)
+
+        gray_edge_image = process_image.edgeDetection(self.original_image)
+        inv_image = cv.bitwise_not(gray_edge_image)
+
+
+        cv.imshow('gray_image', gray_edge_image   )
+        cv.waitKey(0)
+        cv.destroyAllWindows()  # delete all windows
+        white_pixels = cv.findNonZero(gray_edge_image)
 
         # Change draw_arr depending on image pixels
         for pixel2 in white_pixels:
@@ -47,8 +55,6 @@ class Raster():
             pixel_width_pos = pixel[1]
             pixel_height_pos = pixel[0]
 
-
-
             cell_pixel_width = math.floor((pixel_width_pos / self.image_height) * number_cells_width)
             cell_pixel_height = math.floor((pixel_height_pos / self.image_width) * number_cells_height)
 
@@ -56,7 +62,8 @@ class Raster():
             #print(cell_pixel_height)
 
             # Change draw arr pixel
-            draw_arr[cell_pixel_width][cell_pixel_height] += 1
+
+            draw_arr[cell_pixel_height][cell_pixel_width] += 1
 
 
         # Array of lines to return
@@ -69,7 +76,7 @@ class Raster():
             for j in range(0, number_cells_height):
 
                 # Determine whether to draw here, otherwise add point to lines after converting
-                if draw_arr[i][j] > 0:
+                if draw_arr[j][i] > 0:
 
                     pixel_width_pos = math.floor((i / number_cells_width) * self.image_width)
                     pixel_height_pos = math.floor((j / number_cells_height) * self.image_height)
