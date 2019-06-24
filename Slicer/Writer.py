@@ -2,6 +2,7 @@
 # For converting slicer results into a gcode file
 
 import _datetime
+import os
 
 # image_to_gcode
 # Input: image: the grayscale, line image to be converted into g-code commands
@@ -9,13 +10,24 @@ import _datetime
 # Input: raster: Boolean, whether to raster or not
 # Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
-def image_to_gcode(filename, lines, feedrate, max_width, max_height, image_width, image_height, z_hop=None, z_tune=None):
-    filename = "./GCode/" + filename
+def points_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
+    """
+    Convert a list of points to G-code.
+    :param filename: [str] The name of the file to be created
+    :param points: [x, y] The list of points
+    :param feedrate: [mm/s] The feedrate of the Gcode
+    :param z_hop: [mm] Total distance to hop in z between moves
+    :param z_tune: [mm] Tuning parameter
+    :return: None
+    """
+
+    filename, file_ext = os.path.splitext(fullfilename)
+
+    filename = "./GCode/" + filename + str(".gcode")
 
     # Check for file existence and overwrite if necessary
     try:
         # File already exists, overwrite it
-        # TODO, overwrite the file
         file = open(str(filename), 'w', 1)
 
     except FileNotFoundError:
@@ -23,27 +35,33 @@ def image_to_gcode(filename, lines, feedrate, max_width, max_height, image_width
         print(FileNotFoundError.strerror)
         file = open(str(filename), 'w')
 
-    writeIntroduction(file)
-    writeBody(file, lines, max_width, max_height, image_width, image_height, z_tune, z_hop, feedrate)
-    writeConclusion(file)
-    file.close()
+    # Write to the file
+    write_introduction(file, filename) # Write an introduction to the file
+    writeBody(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
+    write_conclusion(file) # Write the conclusion to the file
+    file.close() # Close the file
 
-# writeIntroduction()
-# Write the introduction and settings of the G-code file
-# Input: file: The file to write the introduction to
-def writeIntroduction( file):
-    # TODO Write the settings to the file
+
+def write_introduction(file, filename):
+    """
+    Write the introduction to a Gcode file
+    :param file: The file to write to
+    :return: None
+    """
     today = str(_datetime.datetime.today())
+    file.write("; " + str(filename))
     file.write("; Created by FaceDraw on: " + str(today) + "\n")
     file.write("; Find FaceDraw on: http:/github.com/flipthedog/facedraw\n")
     file.write("; Settings: \n")
     file.write("G90") # Absolute mode
 
-# writeConclusion()
-# Write the conclusion of the file
-# Input: file: the
-def writeConclusion( file):
-    # TODO write the conclusion of this
+
+def write_conclusion(file):
+    """
+    Write a conclusion to a Gcode file
+    :param file: The file to write to
+    :return: None
+    """
     file.write("\n; Find FaceDraw on: http:/github.com/flipthedog/facedraw")
     file.write("\n")
     file.write("; Thanks")
@@ -56,25 +74,19 @@ def writeConclusion( file):
 # Input: z_hop: The height to hop in between draw moves
 # Input: lines: An array of lines to be drawn
 # Output: None
-def writeBody(file, lines, max_width, max_height, image_width, image_height, z_tune=0.0, z_hop=5.0, feedrate=750):
+def writeBody(file, lines, z_tune=0.0, z_hop=5.0, feedrate=750):
     # Assumptions: All the points are in order representing a path
 
-    # Convert to bed coordinates
-    width_ratio = max_width / image_width
-    height_ratio = max_height / image_height
-
-    file.write("\n; Putting down " + str(len(lines)) + " dots")
+    file.write("\n; This image consists of " + str(len(lines)) + " dots")
 
     # Iterate through all the points in the line
     for point in lines:
         # Point = (height, width)
-        x = point[0]
-        y = point[1]
+        g_code_x = point[0]
+        g_code_y = point[1]
+
         # print("Pulled: X: ", x, "Y: ", y)
 
-        # The G-code position
-        g_code_x = x * width_ratio
-        g_code_y = y * height_ratio
         g_code_z = z_tune + z_hop
 
         # Go to position

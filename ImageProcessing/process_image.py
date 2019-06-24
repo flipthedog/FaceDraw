@@ -87,7 +87,7 @@ def morphTrans(threshold_image, stringType, intensity, iterations):
 # Input: gray_image: A gray-scale image
 # Output: An image with detected edges
 def edgeDetection(gray_image):
-    cannied_image = cv.Canny(gray_image, 100, 400, apertureSize=3)
+    cannied_image = cv.Canny(gray_image, 80, 90, apertureSize=3)
     return cannied_image
 
 # openImage()
@@ -95,7 +95,7 @@ def edgeDetection(gray_image):
 # Input: image_name: the name of the image to be opened
 # Output: The opened image
 def openImage(image_name):
-    image_ext = {'.jpg', '.png', '.gif'}
+    image_ext = {'.jpg', '.png', '.gif', '.jpeg'}
 
     flag = False
 
