@@ -25,7 +25,7 @@ z_hop = 3.0 # The total Z-hop between each dot (mm)
 z_tune = 0.0 # Tune the Z-axis
 
 # Take the picture
-# takepicture.take_picture(filename)
+# takepicture.take_picture(filename) # Uncomment this if you want to take a picture
 
 # open the image
 cv_image = process_image.openImage(filename)

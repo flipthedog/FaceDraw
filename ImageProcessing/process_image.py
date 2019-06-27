@@ -4,20 +4,30 @@ import cv2 as cv
 import numpy as np
 import re
 
-# grayImage
-# Grayscale the color of the image
-def grayImage(image):
+def grayImage(image, show=False):
+    """
+    Convert the image to grayscale
+    :param image: [opencv image] The image to covnert
+    :param show: [boolean] Show the new image
+    :return: [opencv image] Grayed image
+    """
     gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    if show:
+        cv.imshow('Gray image', gray_image)
     return gray_image
 
-# blurImage
-# Input: A grayscale image
-# Blur the image with different possible filters
-# "regular", 0 = regular blur with cv.Blur()
-# "median", 1 = median blur with cv.medianBlur()
-# "bilateral", 2 = bilateral blur with cv.bilateralFilter()
-# "gaussian", 3 = gaussian blur with cv.GaussianBlur()
-def blurImage(gray_image, stringType):
+def blurImage(gray_image, stringType, show=False):
+    """
+    Blur the image
+    :param gray_image: Convert the image to grayscale
+    :param stringType: [str] or [int] Type of blur to perform
+        0. regular
+        1. median
+        2. bilateral
+        3. gaussian
+    :param show: [boolean] Show the new image
+    :return: [opencv image] Blurred image
+    """
     if stringType is "regular" or stringType is 0:
         blur = cv.blur(gray_image, (5, 5))
     elif stringType is "median" or stringType is 1:
@@ -26,25 +36,36 @@ def blurImage(gray_image, stringType):
         blur = cv.bilateralFilter(gray_image, 5, 8, 8)
     else:
         print("Error: Invalid blurImage() type parameter")
-
+    if show:
+        cv.imshow('Blurred image', blur)
     return blur
 
-# contourImage
-# Input: A grayscale image
-# Finds the contours of an image
-def contourImage(gray_image):
+def contourImage(gray_image, show=False):
+    """
+    Find the contours in the image and highlight them
+    :param gray_image: [opencv image] An image in grayscale
+    :param show: [boolean] Show the new image
+    :return: [opencv image] The contoured image
+    """
     ret, thresh = cv.threshold(gray_image, 55, 255, 0)
     contoured_image, contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    if show:
+        cv.imshow('Contour image', contoured_image)
     return contoured_image
 
-# thresholdImage
-# Input: A (blurred) grayscale image
-# Input: A string or integer specifying the thresholding type
-# Find the threshold with different function types and parameters
-# "regular" or 0: Global thresholding with cv.threshold()
-# "gaussian" or 1: Adaptive mean thresholding with cv.adaptiveThreshold()
-# "mean" or 2: Adaptive gaussian thresholding with cv.adaptiveThreshold()
-def thresholdImage(gray_image, stringType, gaussianSize=None):
+def thresholdImage(gray_image, stringType, gaussianSize=None, show=False):
+    """
+    Remove all of the pixels below a treshold value
+    :param gray_image: [opencv image] A grayscale image
+    :param stringType: [str] or [int] The type of thresholding
+        0. regular
+        1. gaussian
+        2. mean
+        3. otsu
+    :param gaussianSize: [int] if gaussian, the size of the gaussian function
+    :param show: [boolean] Show the new image
+    :return: [opencv image] The thresholded image
+    """
     if stringType is "regular" or 0:
         ret, thresholdImage = cv.threshold(gray_image, 127, 255, cv.THRESH_BINARY)
     elif stringType is "gaussian" or 1:
@@ -57,18 +78,21 @@ def thresholdImage(gray_image, stringType, gaussianSize=None):
         print("Error: Invalid stringtype parameter in thresholdImage()")
         return -1 # Return an error code
 
+    if show:
+        cv.imshow('Threshold image', thresholdImage)
     return thresholdImage
 
 
-# morphTrans()
-# Perform a morphological transformation on the image
-# Input: treshold_image: The thresholded image that needs to be morphed
-# Input: stringType: A string or integer to select the type of transform
-# stringType:
-# "erosion" or "erode" or 0: Erode the selected image
-# "dilute" or "dilution" or 1: Dilute the selected image
-def morphTrans(threshold_image, stringType, intensity, iterations):
-
+def morphTrans(threshold_image, stringType, intensity, iterations, show=False):
+    """
+    Perform a morphological transformation on the image
+    :param threshold_image: [opencv image] The thresholded image that needs to be morphed
+    :param stringType: [str] or [int] The type of morphing to perform
+    :param intensity: [int] The intensity of the morphing
+    :param iterations: [int] The number of morphs
+    :param show: [boolean] Show the new image
+    :return: [opencv image] The morphed image
+    """
     kernel = np.ones((intensity, intensity), np.uint8)
 
     if stringType is "erosion" or stringType is "erode" or stringType is 0:
@@ -80,21 +104,30 @@ def morphTrans(threshold_image, stringType, intensity, iterations):
     else:
         print("Error: Incorrect morphtrans() parameters")
 
+    if show:
+        cv.imshow('Morphed Image', morphed_image)
+
     return morphed_image
 
-# edgeDetection
-# Use opencv's edge detection function Canny()
-# Input: gray_image: A gray-scale image
-# Output: An image with detected edges
-def edgeDetection(gray_image):
+def edgeDetection(gray_image, show=False):
+    """
+    Perform edge detection on an image
+    :param gray_image: [opencv image] A gray image to perform edge detection on
+    :param show: [boolean] Show the new image
+    :return: [opencv image] The edge detected image
+    """
     cannied_image = cv.Canny(gray_image, 80, 90, apertureSize=3)
+    if show:
+        cv.imshow('Morphed Image', cannied_image)
     return cannied_image
 
-# openImage()
-# Open the image
-# Input: image_name: the name of the image to be opened
-# Output: The opened image
-def openImage(image_name):
+def openImage(image_name, show=False):
+    """
+    Open an image
+    :param image_name: [str] The filename of the image
+    :param show: [boolean] Show the opened image
+    :return:
+    """
     image_ext = {'.jpg', '.png', '.gif', '.jpeg'}
 
     flag = False
@@ -116,16 +149,25 @@ def openImage(image_name):
         print(FileNotFoundError.strerror)
         print("Error: Image not opened")
 
+    if show:
+        cv.imshow('Opened image', imageToProcess)
+
     return imageToProcess
 
-# invertImage()
-# Invert the color of the image
-# Input: cv_image: The image to invert
-# Output: The inverted image
-def invertImage(cv_image):
-    return cv.bitwise_not(cv_image)
 
-def processImage(image_name, displayWindows):
+def invertImage(cv_image, show=False):
+    """
+    Invert the pixels of a binary (black or white) image
+    :param cv_image: [opencv image] The binary image to invert
+    :return: inverted_image [opencv image] The inverted image
+    """
+    inverted_image = cv.bitwise_not(cv_image)
+    if show:
+        cv.imshow('Inverted Image', inverted_image)
+    return inverted_image
+
+
+def processImage(image_name, displayWindows=False):
 
     imageToProcess = openImage(image_name)
     gray_image = grayImage(imageToProcess)
@@ -146,10 +188,10 @@ def processImage(image_name, displayWindows):
     if displayWindows:
         cv.imshow("Original", imageToProcess)
         cv.imshow("Gray", gray_image)
-        cv.imshow("Blurred", blurred_image)
-        cv.imshow("Threshold", threshold_image)
-        cv.imshow("Dilated", dilated_image)
-        cv.imshow("Eroded", eroded_image)
+        # cv.imshow("Blurred", blurred_image)
+        # cv.imshow("Threshold", threshold_image)
+        # cv.imshow("Dilated", dilated_image)
+        # cv.imshow("Eroded", eroded_image)
 
         cv.waitKey(0)
         cv.destroyAllWindows()

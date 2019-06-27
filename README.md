@@ -26,6 +26,7 @@ Processed:
 Final Result:
 
 ![](./images/final_result.jpg)
+![](./images/another_final_result.jpeg)
 
 ## Work in Progress
 Right now the raster function works! Create your own raster of an image by following the instructions below!
@@ -33,7 +34,17 @@ Right now the raster function works! Create your own raster of an image by follo
 request](https://github.com/flipthedog/FaceDraw/pulls)!
 
 ## Instructions
-Follow the instructions below!
+Right now just Rastering works, do the following:
+1. Open create_raster_gcode.py
+2. Edit the necessary settings found within the file
+    a. Uncomment to take a picture
+    b. Change the filename
+    c. Change bed size
+    d. Change feedrate
+    e. (Optional) Change z_hop
+    f. (Optional) Change z_tune
+3. Execute the program
+4. Look in the GCode folder for your .gcode file with the name filename
 
 ### Required Modules
 1. Python version 3.x
