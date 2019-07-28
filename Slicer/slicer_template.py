@@ -1,4 +1,4 @@
-# Slicer.py
+# Lines.py
 # Purpose: Slice the image to G-code commands
 
 # Import
@@ -6,80 +6,109 @@ import math
 from ImageProcessing import process_image
 import numpy as np
 import _datetime
-import cv2 as cv
+from cv2 import cv2 as cv
 
 # Slicer Class
 class Slicer:
 
-    def __init__(self, image, feedrate, bed_size, z_hop=None, z_tune=None):
+    def __init__(self, image, bed_size, line_width = 1.0, lock_ratio = True):
+        """
+        Constructor, create a Raster object to slice an image. Raster uses individual points as opposed to lines
+        :param image: [opencv image] The image to process and slice
+        :param bed_size: [mm] [n x m] The size of the bed height (n) by width (m)
+        :param line_width: [mm] The line width of the image (dots per mm)
+        :param lock_ratio: [boolean] Crop the bed size to meet the image ratio
+        """
+
         # The image to be processed
-        self.original_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        self.original_image = image
+        self.gray_image = process_image.grayImage(self.original_image, True)
+        self.edge_image = process_image.edgeDetection(self.gray_image, True)
+        self.inverted_image = process_image.invertImage(self.edge_image, True)
+
+        # The resolution of the image
+        self.line_width = line_width
+        # Increasing the line width will result in a lower resolution
+        # Decreasing the line width will result in a higher resolution
+        # This might change depending on your marker size or XY accuracy
 
         # Bed specifications
-        self.max_width = bed_size[0]
-        self.max_height = bed_size[1]
+        self.max_bed_height = bed_size[0]
+        self.max_bed_width = bed_size[1]
 
         # Image specifications
         shape = image.shape
-        self.image_width = shape[1] # Horizontal pixel no.
-        self.image_height = shape[0] # Vertical pixel no.
+        self.image_height = shape[0]  # Vertical pixel number
+        self.image_width = shape[1]  # Horizontal pixel number
 
-        # User specified settings
-        # Vertical distance (mm) to z-hop
-        if z_hop == None:
-            self.z_hop = 0.3
+        # If lock_ratio is on, the program will maintain the ratio of the image by reducing the bed-size
+        # to maintain the height-width ratio of the image
+        if lock_ratio:
+            self.find_compression()
+
+        self.width_number = self.max_bed_width / self.line_width # Number of possible pixels in drawing width
+        self.height_number = self.max_bed_height / self.line_width # Number of possible pixels in drawing height
+
+        self.white_pixels = []
+
+    def find_compression(self):
+        # Can only reduce, because we don't want to increase the maximum bed size
+        bed_ratio = self.max_bed_height / self.max_bed_width
+        image_ratio = self.image_height / self.image_width
+
+        if bed_ratio < image_ratio:
+            # This means that the width of the bed will have to decrease
+            self.max_bed_width = (image_ratio / bed_ratio) * self.max_bed_width
         else:
-            self.z_hop = z_hop
+            # This means that the height of the bed will have to decrease
+            self.max_bed_height = (image_ratio / bed_ratio) * self.max_bed_height
 
-        # Vertical adjustment (mm)
-        if z_tune == None:
-            self.z_tune = 0
-        else:
-            self.z_tune = z_tune
+    def slice(self):
+        """
+        Create a list of points representing G-code moves
+        :return: [[x1, y1] ...] An array of x-y points
+        """
 
-        self.feedrate = feedrate
+        # Initialize the array of which squares need to be drawn to all zeros
+        draw_arr = [[0 for x in range(self.width_number)] for y in range(self.height_number)]
 
-    # containsPixels()
-    # Look through the image to see if there are still lines to be found
-    # Input: check_image: A black and white image to check
-    # Output: Boolean value representing whether the image still contains pixels
-    def containsPixels(self, check_image):
+        self.white_pixels =  cv.findNonZero(self.edge_image)
 
-        zeros = np.zeros((self.width, self.height), dtype=np.uint8)
-        ones = np.ones((self.width, self.height), dtype=np.uint8)
-        ones = ones * 255
+        for pixel in self.white_pixels:
+            actual_pixel = pixel[0]
 
-        indices = np.where(check_image == [255])
-        coordinates = [indices[0], indices[1]]
+            width_pos = actual_pixel[0]
+            height_pos = actual_pixel[1]
 
-        new_coordinates = np.asarray(coordinates, dtype=np.uint8)
+            cell_pixel_width = math.floor((width_pos / self.image_width) * self.width_number)
+            cell_pixel_height = math.floor((height_pos / self.image_height) * self.height_number)
 
-        if not len(new_coordinates[0]) > 0:
-            # There are no more pixels to process, image contains no pixels
-            return False
-        else:
-            # There are still pixels to process, image still contains pixels
-            return True
+            # Toggle a specific square in the drawing array
+            draw_arr[cell_pixel_height - 1][cell_pixel_width - 1] += 1
 
-    # distanceBetween()
-    # Find the distance between two pixels
-    # Input: pixel_1[width, height]
-    # Input: pixel_2[width, height]
-    # Output: Number representing the distance
-    def distanceBetween(self, pixel_1, pixel_2, printout=False):
 
+    @staticmethod
+    def distance_between(pixel_1, pixel_2, printout=False):
+        """
+        Find the distance between two pixels
+        :param pixel_1: [height, width] The first pixel
+        :param pixel_2: [height, width] The second pixel
+        :param printout: [boolean] Output distance
+        :return: The distance between the two pixels
+        """
         if printout:
             # Print out the two pixels
             print("Pixel: " + str(pixel_1[0]) + " , " + str(pixel_1[1]))
-
         return math.sqrt((pixel_1[0] - pixel_2[0]) ** 2 + (pixel_1[1] - pixel_2[1]) ** 2)
 
-    # distancePointLine()
-    # Return the distance between a point and a line
-    # Input: A point
-    # Input: Line: An array representing the factors of the line equation
-    def distancePointLine(self, point, line):
-
+    @staticmethod
+    def distance_point_line(point, line):
+        """
+        Distance between a point and the closest point on a given line
+        :param point: [height, width] The point
+        :param line:  [slope, y_intercept] The equation of the line
+        :return: The distance between the point and the line
+        """
         x = point[0]
         y = point[1]
 

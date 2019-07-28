@@ -13,7 +13,7 @@ import cv2 as cv
 # 3. Run the Script
 
 # Your filename here
-filename = 'image_2.jpeg'
+filename = 'oma3.jpg'
 
 # Printer configuration
 bed_height = 280

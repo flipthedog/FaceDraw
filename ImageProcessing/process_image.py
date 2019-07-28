@@ -67,7 +67,7 @@ def thresholdImage(gray_image, stringType, gaussianSize=None, show=False):
     :return: [opencv image] The thresholded image
     """
     if stringType is "regular" or 0:
-        ret, thresholdImage = cv.threshold(gray_image, 127, 255, cv.THRESH_BINARY)
+        ret, thresholdImage = cv.threshold(gray_image, 120, 255, cv.THRESH_BINARY)
     elif stringType is "gaussian" or 1:
         thresholdImage = cv.adaptiveThreshold(gray_image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 3, gaussianSize )
     elif stringType is "mean" or 2:
@@ -116,9 +116,9 @@ def edgeDetection(gray_image, show=False):
     :param show: [boolean] Show the new image
     :return: [opencv image] The edge detected image
     """
-    cannied_image = cv.Canny(gray_image, 80, 90, apertureSize=3)
+    cannied_image = cv.Canny(gray_image, 85, 155, apertureSize=3)
     if show:
-        cv.imshow('Morphed Image', cannied_image)
+        cv.imshow('Edge Detection Image', cannied_image)
     return cannied_image
 
 def openImage(image_name, show=False):
