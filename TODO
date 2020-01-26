@@ -1,0 +1,5 @@
+1. Optimize the BFS line algorithm
+2. Make this work for more firmware types
+3. Create an interface
+4. Create documentation/tutorials
+5. Restructure slicer and write classes

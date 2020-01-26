@@ -1,12 +1,8 @@
 import cv2 as cv
-from Slicer import Lines
+from Slicer import Moving
 from Slicer import Writer
 from ImageProcessing import process_image
 
-# INSTRUCTIONS:
-# 1. Change the filename field below
-# 2. Change the printer configuration below
-# 3. Run the Script
 
 # Your filename here
 filename = 'dog.jpg'
@@ -27,10 +23,11 @@ z_tune = 0.0 # Tune the Z-axis
 # open the image
 cv_image = process_image.openImage(filename)
 
-lines = Lines.Slicer(cv_image, bed_size, line_width=1.0)
-points = lines.slice(5)
+moving = Moving.Moving(cv_image, bed_size, line_width=1.0)
+points = moving.slice()
 
-Writer.points_moves_to_gcode(filename, points, feedrate, z_hop=z_hop, z_tune=z_tune)
+print(points)
+#Writer.points_moves_to_gcode(filename, points, feedrate, z_hop=z_hop, z_tune=z_tune)
 
 cv.waitKey(0)
 cv.destroyAllWindows() # delete all windows

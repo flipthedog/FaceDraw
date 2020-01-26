@@ -8,6 +8,7 @@ import numpy as np
 import _datetime
 import cv2 as cv
 
+
 # Slicer Class
 class Slicer:
 
@@ -55,7 +56,11 @@ class Slicer:
         self.white_pixels = []
 
     def find_compression(self):
-        # Can only reduce, because we don't want to increase the maximum bed size
+        """
+        Find a working compression based on the image ratio
+        :return: None, object image modified
+        """
+        # Can only reduce, because we don't want to increase beyond the maximum bed size
         bed_ratio = self.max_bed_height / self.max_bed_width
         image_ratio = self.image_height / self.image_width
 
@@ -66,12 +71,19 @@ class Slicer:
             # This means that the height of the bed will have to decrease
             self.max_bed_height = math.floor((image_ratio / bed_ratio) * self.max_bed_height)
 
-    def slice(self):
+    def slice(self, distance_threshold):
         """
-        Create a list of points representing G-code moves
+        Create a list of points representing G-code moves based on object loaded image
+        :param: distance_threshold : Int : The maximum distance between pixels
         :return: [[x1, y1] ...] An array of x-y points
         """
 
+        # EXPLANATION
+        # 1. Find all the white pixels in the binary image
+        # 2. Pop the first white pixel
+        # 3. Find the nearest pixel, pop it, and add it to return array
+        # 4. Repeat finding nearest pixel until no pixels can be found or no more white pixels exist
+        # 5. If no near pixel is found, add a move to the return array, and go to step 2.
         # Initialize the array of which squares need to be drawn to all zeros
         draw_arr = [[0 for x in range(self.width_number)] for y in range(self.height_number)]
 
@@ -93,8 +105,6 @@ class Slicer:
 
         # Find the compressed white pixels to draw
         self.white_pixels = self.find_white_pixels(draw_arr)
-
-        distance_threshold = 7
 
         return_arr = []
 
@@ -180,7 +190,7 @@ class Slicer:
             return -1
 
         if pop:
-            del_el = self.white_pixels.pop(closest_index) # Remove the closest point from white pixels
+            self.white_pixels.pop(closest_index) # Remove the closest point from white pixels
 
         return closest_point
 
@@ -270,13 +280,6 @@ class Slicer:
 
         # An array of tuples containing (distance to home pixel, point[x,y])
         points = []
-
-        # Done TODO Loop through and find all points that are not in a line yet
-        # TODO Create a loop to form a line
-        # TODO Form a trend out of all the points currently in the line
-        # TODO Create a function that decides whether the point is within the trend
-        # TODO If the point is in the trend, remove the point from the image and add it to the line
-        # TODO Then add the line to the rest of the lines
 
         # Put all white points in an array along with their distance to home point
         for pixel in white_pixels:

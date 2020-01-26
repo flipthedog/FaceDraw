@@ -26,6 +26,7 @@ def points_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
     filename = "./GCode/" + filename + str(".gcode")
 
     # Check for file existence and overwrite if necessary
+
     try:
         # File already exists, overwrite it
         file = open(str(filename), 'w', 1)

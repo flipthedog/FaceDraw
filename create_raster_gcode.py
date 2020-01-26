@@ -13,7 +13,7 @@ import cv2 as cv
 # 3. Run the Script
 
 # Your filename here
-filename = 'oma3.jpg'
+filename = 'dog.jpg'
 
 # Printer configuration
 bed_height = 280
@@ -30,14 +30,19 @@ z_tune = 0.0 # Tune the Z-axis
 # open the image
 cv_image = process_image.openImage(filename)
 
+
 # Perform image processing
 gray_image = process_image.grayImage(cv_image)
 gray_edge_image = process_image.edgeDetection(gray_image)
 
 # Show results of the cv functions
 # Uncomment for debugging
-cv.imshow('gray_image', gray_image)
-cv.imshow('gray_edge', process_image.invertImage(gray_edge_image))
+resized = cv.resize(cv_image, (1320, 720))
+cv.imshow('image', resized)
+resized = cv.resize(gray_image, (1320, 720))
+cv.imshow('gray_image', resized)
+resized = cv.resize(process_image.invertImage(gray_edge_image), (1320, 720))
+cv.imshow('gray_edge', resized)
 
 # Wait for user to press key
 cv.waitKey(0)
