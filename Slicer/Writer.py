@@ -39,7 +39,7 @@ def points_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
     # Write to the file
     write_introduction(file, filename) # Write an introduction to the file
     write_body(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
-    write_conclusion(file) # Write the conclusion to the file
+    write_conclusion(file, filename) # Write the conclusion to the file
     file.close() # Close the file
 
 # image_to_gcode
@@ -63,20 +63,23 @@ def points_moves_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=Non
 
     filename = "./GCode/" + filename + str(".gcode")
 
-    # Check for file existence and overwrite if necessary
     try:
-        # File already exists, overwrite it
-        file = open(str(filename), 'w', 1)
+        # Check for file existence and overwrite if necessary
+        try:
+            # File already exists, overwrite it
+            file = open(str(filename), 'w', 1)
 
-    except FileNotFoundError:
-        # File does not exist, create it
-        print(FileNotFoundError.strerror)
-        file = open(str(filename), 'w')
+        except FileNotFoundError:
+            # File does not exist, create it
+            print(FileNotFoundError.strerror)
+            file = open(str(filename), 'w')
+    except:
+        file = open(str(filename + str(".gcode")), 'w')
 
     # Write to the file
     write_introduction(file, filename) # Write an introduction to the file
     write_body2(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
-    write_conclusion(file) # Write the conclusion to the file
+    write_conclusion(file, filename) # Write the conclusion to the file
     file.close() # Close the file
 
 def write_introduction(file, filename):
@@ -93,7 +96,7 @@ def write_introduction(file, filename):
     file.write("G90") # Absolute mode
 
 
-def write_conclusion(file):
+def write_conclusion(file, fullfilename):
     """
     Write a conclusion to a Gcode file
     :param file: The file to write to
@@ -102,6 +105,10 @@ def write_conclusion(file):
     file.write("\n; Find FaceDraw on: http:/github.com/flipthedog/facedraw")
     file.write("\n")
     file.write("; Thanks")
+
+
+    print("Operation complete!")
+    print("File saved to:", fullfilename)
 
 # writeBody()
 # Convert an array of points to G-code moves

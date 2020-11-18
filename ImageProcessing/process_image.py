@@ -13,7 +13,8 @@ def grayImage(image, show=False):
     """
     gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     if show:
-        cv.imshow('Gray image', gray_image)
+        show = cv.resize(gray_image, (1320, 720))
+        cv.imshow('Gray image', show)
     return gray_image
 
 def blurImage(gray_image, stringType, show=False):
@@ -28,16 +29,17 @@ def blurImage(gray_image, stringType, show=False):
     :param show: [boolean] Show the new image
     :return: [opencv image] Blurred image
     """
-    if stringType is "regular" or stringType is 0:
+    if stringType == "regular" or stringType == 0:
         blur = cv.blur(gray_image, (5, 5))
-    elif stringType is "median" or stringType is 1:
+    elif stringType == "median" or stringType == 1:
         blur = cv.medianBlur(gray_image, 5)
-    elif stringType is "bilateral" or stringType is 2:
+    elif stringType == "bilateral" or stringType == 2:
         blur = cv.bilateralFilter(gray_image, 5, 8, 8)
     else:
         print("Error: Invalid blurImage() type parameter")
     if show:
-        cv.imshow('Blurred image', blur)
+        show = cv.resize(blur, (1320, 720))
+        cv.imshow('Blurred image', show)
     return blur
 
 def contourImage(gray_image, show=False):
@@ -50,7 +52,8 @@ def contourImage(gray_image, show=False):
     ret, thresh = cv.threshold(gray_image, 55, 255, 0)
     contoured_image, contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     if show:
-        cv.imshow('Contour image', contoured_image)
+        show = cv.resize(contoured_image, (1320, 720))
+        cv.imshow('Contour image', show)
     return contoured_image
 
 def thresholdImage(gray_image, stringType, gaussianSize=None, show=False):
@@ -66,20 +69,21 @@ def thresholdImage(gray_image, stringType, gaussianSize=None, show=False):
     :param show: [boolean] Show the new image
     :return: [opencv image] The thresholded image
     """
-    if stringType is "regular" or 0:
+    if stringType == "regular" or 0:
         ret, thresholdImage = cv.threshold(gray_image, 120, 255, cv.THRESH_BINARY)
-    elif stringType is "gaussian" or 1:
+    elif stringType == "gaussian" or 1:
         thresholdImage = cv.adaptiveThreshold(gray_image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 3, gaussianSize )
-    elif stringType is "mean" or 2:
+    elif stringType == "mean" or 2:
         thresholdImage = cv.adaptiveThreshold(gray_image, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 3, gaussianSize)
-    elif stringType is "otsu" or 3:
+    elif stringType == "otsu" or 3:
         ret, thresholdImage = cv.threshold(gray_image, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
     else:
         print("Error: Invalid stringtype parameter in thresholdImage()")
         return -1 # Return an error code
 
     if show:
-        cv.imshow('Threshold image', thresholdImage)
+        show = cv.resize(thresholdImage, (1320, 720))
+        cv.imshow('Threshold image', show)
     return thresholdImage
 
 
@@ -95,17 +99,18 @@ def morphTrans(threshold_image, stringType, intensity, iterations, show=False):
     """
     kernel = np.ones((intensity, intensity), np.uint8)
 
-    if stringType is "erosion" or stringType is "erode" or stringType is 0:
+    if stringType == "erosion" or stringType == "erode" or stringType == 0:
         morphed_image = cv.erode(threshold_image, kernel, iterations)
-    elif stringType is "dilate" or stringType is "dilation" or stringType is 1:
+    elif stringType == "dilate" or stringType == "dilation" or stringType == 1:
         morphed_image = cv.dilate(threshold_image, kernel, iterations)
-    elif stringType is "open" or stringType is "opening" or stringType is 2:
+    elif stringType == "open" or stringType == "opening" or stringType == 2:
         morphed_image = cv.morphologyEx(threshold_image, cv.MORPH_OPEN, kernel)
     else:
         print("Error: Incorrect morphtrans() parameters")
 
     if show:
-        cv.imshow('Morphed Image', morphed_image)
+        show = cv.resize(morphed_image, (1320, 720))
+        cv.imshow('Morphed Image', show)
 
     return morphed_image
 
@@ -118,7 +123,8 @@ def edgeDetection(gray_image, show=False):
     """
     cannied_image = cv.Canny(gray_image, 85, 155, apertureSize=3)
     if show:
-        cv.imshow('Edge Detection Image', cannied_image)
+        show = cv.resize(cannied_image, (1320, 720))
+        cv.imshow('Edge Detection Image', show)
     return cannied_image
 
 def openImage(image_name, show=False):
@@ -150,7 +156,8 @@ def openImage(image_name, show=False):
         print("Error: Image not opened")
 
     if show:
-        cv.imshow('Opened image', imageToProcess)
+        show = cv.resize(imageToProcess, (1320, 720))
+        cv.imshow('Opened image', show)
 
     return imageToProcess
 
@@ -163,7 +170,8 @@ def invertImage(cv_image, show=False):
     """
     inverted_image = cv.bitwise_not(cv_image)
     if show:
-        cv.imshow('Inverted Image', inverted_image)
+        show = cv.resize(inverted_image, (1320, 720))
+        cv.imshow('Inverted Image', show)
     return inverted_image
 
 

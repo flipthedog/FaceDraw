@@ -94,6 +94,92 @@ class Moving:
         #    b. Pop it, if it does
         #    c. Add its location to the moving average
 
+        # Initialize the dict to 0
+        for x in range(self.width_number):
+
+            for y in range(self.height_number):
+
+                self.draw_arr[(y, x)] = 0
+
+        print(self.draw_arr)
+
+        self.white_pixels = cv.findNonZero(self.edge_image)
+
+        for pixel in self.white_pixels:
+            actual_pixel = pixel[0]
+
+            width_pos = actual_pixel[0]
+            height_pos = actual_pixel[1]
+
+            cell_pixel_width = math.floor((width_pos / self.image_width) * self.width_number)
+            cell_pixel_height = math.floor((height_pos / self.image_height) * self.height_number)
+
+            # Toggle a specific square in the drawing array
+            self.draw_arr[(cell_pixel_height, cell_pixel_width)] += 1
+
+        # Find the compressed white pixels to draw
+        self.white_pixels = self.find_white_pixels(self.draw_arr)
+
+        number_of_pixels = len(self.white_pixels)
+
+        current_average_x = 0  # Store the x position of the moving average
+        current_average_y = 0  # Store the y position of the moving average
+        total_average_number = 0  # The total number of pixels in the moving average
+
+        commands = []  # Array of move & draw commands
+
+        while len(self.white_pixels) > 1:
+
+            # Pop one pixel, choose it  as the origin from which to draw a moving average
+            # line
+
+            pixel = self.white_pixels.pop(0)
+
+            pixel_width_pos = pixel[0]
+            pixel_height_pos = pixel[1]
+
+            print("Popped Head: ", pixel_width_pos, pixel_height_pos)
+
+            total_x = pixel_width_pos
+            total_y = pixel_height_pos
+            current_average_x = pixel_width_pos
+            current_average_y = pixel_height_pos
+            total_average_number += 1
+
+            commands.append([-1, -1])  # Insert move command
+
+            # Keep looping until we reach a stopping condition
+            stop_flag = False
+
+            while ~stop_flag:
+
+                print("Current dict length:", self.get_length_dict())
+
+                near_pixels = self.get_all_nearby([current_average_y, current_average_x], distance_threshold)
+
+                print("Near: ", near_pixels)
+
+                if len(near_pixels) > 0:
+                    # There is at least one pixel nearby
+
+                    first_near_x = near_pixels[0][1]
+                    first_near_y = near_pixels[0][0]
+
+                    # Pop the near pixel from the draw_arr
+                    self.draw_arr[(first_near_y, first_near_x)] = 0
+                    self.white_pixels = self.find_white_pixels(self.draw_arr)
+
+                else:
+                    stop_flag = True  # Break the loop, there are no pixels nearby
+
+
+                total_average_number += 1
+
+                total_x += first_near_x
+                total_y += first_near_y
+
+                current_average_x = total_x / total_average_number
+                current_average_y = total_y / total_average_number
 
     def get_length_dict(self):
         """
@@ -122,6 +208,41 @@ class Moving:
         :return: [pixel1, pixel2, pixel3] An array of black pixels nearby the given pixels
         """
 
+        home_x = pixel[1]
+        home_y = pixel[0]
+
+        distance_dir = round(threshold / 2)
+
+        # Form the minimum barrier
+        min_x = int(home_x - distance_dir)
+        min_y = int(home_y - distance_dir)
+
+        if min_x < 0:
+            min_x = 0
+        if min_y < 0:
+            min_y = 0
+
+        # Form the maximum barrier
+        max_x = int(home_x + distance_dir)
+        max_y = int(home_y + distance_dir)
+
+        if max_x > self.width_number:
+            max_x = self.width_number - 1
+        if max_y > self.height_number:
+            max_y = self.height_number - 1
+
+        # The array of pixels that will be returned
+        return_arr = []
+
+        for y in range(min_y, max_y):
+
+            for x in range(min_x, max_x):
+
+                if self.draw_arr[(y, x)] > 0:
+                    # There is a pixel in this location, so add it!
+                    self.draw_arr[(y, x)] = 0 # Remove the fact that we have to draw at that location
+                    return_arr.append([y, x])
+
         return return_arr
 
     def find_white_pixels(self, draw_dict):
@@ -134,6 +255,18 @@ class Moving:
         # How this works:
         #   1. Go through the draw array to find all spots that need to be drawn
         #   2. Use max bed size to calculate spot to draw on the bed
+
+        draw_pixels = []
+
+        for i in range(0, self.width_number):
+
+            for j in range(0, self.height_number):
+
+                if draw_dict[(j, i)] > 0:
+                    x_position = i * (self.max_bed_width / self.width_number)
+                    y_position = j * (self.max_bed_height / self.height_number)
+
+                    draw_pixels.append([x_position, y_position])
 
         return draw_pixels
 

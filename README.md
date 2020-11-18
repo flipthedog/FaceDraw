@@ -5,11 +5,15 @@ Draw your face, or something else.
 A python program that will convert an image to a G-code file that you can run on a 3D printer. By attaching a marker or other drawing utensil
 your 3d printer head you can draw an image.
 
+## Warning
+Running G-code that you do not understand has the potential to crash your machine. Please make sure you properly understand what this code does before running it.
+Also please know how 3D printers work before running this code.
+
 ## But How?
 The intention of this program is to allow you to draw your face, or anything else, with a 3D printer or similar hardware. Simply strap a pen or marker
-to your machine toolhead and a piece of paper to your print surface and run the generated g-code file.
+to your machine tool head and a piece of paper to your print surface and run the generated g-code file.
 
-On the software side this project relies heavily on OpenCV for image processing as well as a bit of slicer code to generate a G-code file. 
+On the software side this project relies heavily on OpenCV for image processing as well as a bit of slicer code to generate a G-code file.
 Eventually, there will be multiple different types of slicers for different types of images, but now there is just **Raster**.
 
 **Raster** will divide your image into different squares and determine if each square needs to be colored in based on the number
@@ -58,3 +62,6 @@ Right now just Rastering works, do the following:
 
 # Supported Firmware
 Right now this program will only support the **RepRap firmware** flavor. However, that list will grow soon.
+
+# Resources
+1. Use [NCViewer](https://ncviewer.com/) to visualize your generated G-code file!

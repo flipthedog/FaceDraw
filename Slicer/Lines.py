@@ -155,7 +155,7 @@ class Slicer:
 
             for j in range(0, self.height_number):
 
-                if array[j][i] > 0:
+                if array[j][i] > 45:
                     x_position = i * (self.max_bed_width / self.width_number)
                     y_position = j * (self.max_bed_height / self.height_number)
 
