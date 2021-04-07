@@ -3,7 +3,7 @@ from Slicer import Lines
 from Slicer import Writer
 from ImageProcessing import process_image
 
-# INSTRUCTIONS:
+# INSTRUCTIONS
 # 1. Change the filename field below
 # 2. Change the printer configuration below
 # 3. Run the Script
