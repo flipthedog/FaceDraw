@@ -1,4 +1,4 @@
-# Moving.py
+# Scan.py
 # Purpose: Slice the loaded image into G-code commands
 
 # Import
@@ -9,7 +9,7 @@ import _datetime
 import cv2 as cv
 
 
-class Moving:
+class Scan:
 
     def __init__(self, image, bed_size, line_width = 1.0, lock_ratio = True):
         """
@@ -23,8 +23,10 @@ class Moving:
         # The image to be processed
         self.original_image = image
         self.gray_image = process_image.grayImage(self.original_image, True)
-        self.edge_image = process_image.edgeDetection(self.gray_image, True)
-        self.inverted_image = process_image.invertImage(self.edge_image, True)
+        self.binary_image = process_image.thresholdImage(self.gray_image, "regular", show=True)
+        #self.edge_image = process_image.edgeDetection(self.gray_image, True)
+        #self.contours_image = process_image.contourImage(self.edge_image, True)
+        #self.inverted_image = process_image.invertImage(self.edge_image, True)
 
         cv.waitKey(0)
 
@@ -43,8 +45,9 @@ class Moving:
         self.image_height = shape[0]  # Vertical pixel number
         self.image_width = shape[1]  # Horizontal pixel number
 
-        # If lock_ratio is on, the program will maintain the ratio of the image by reducing the bed-size
-        # to maintain the height-width ratio of the image
+        # If lock_ratio is on, the program will maintain the ratio of the image
+        # by reducing the bed- to maintain the height-width ratio of the image
+        # Without this, your image will look squashed depending on camera orientation
         if lock_ratio:
             self.find_compression()
 
@@ -58,10 +61,6 @@ class Moving:
 
         self.used = {} # Store whether a particular pixel value has been used or not
         # Key: tuple: (y , x), where x is the pixel number width, and y is the pixel number height
-
-        # Storage: Array: [pixelvalue, used]
-        #       pixelvalue: The value of the pixel (typically 0 or 1)
-        #       used: Boolean value representing whether it has been used or not
 
         print("This is the width and height of the resultant image: ", self.width_number, self.height_number)
 
@@ -85,15 +84,58 @@ class Moving:
         """
 
         # Purpose:
-        # Create a path out of moving average lines
+        # Create a path out of scanning lines from top to bottom, left to right
 
         # How:
-        # 1. Pop a white pixel
-        # 2. Find the nearest neighbor pixel
-        #    a. Check if it fits within the moving average and distance threshold
-        #    b. Pop it, if it does
-        #    c. Add its location to the moving average
+        # 1. Take in a binarized image
+        # 2. Convert it into cells
+        # 3. Color the cells black or white
+        # 4. Draw all black pixels in a row
 
+        # Cell density
+        number_cells_width = math.floor(self.max_bed_width / self.line_width) # Number of cells / side
+        number_cells_height = math.floor(self.max_bed_height / self.line_width) # Number of cells / side
+
+       # Define a two dimensional array on where to draw, initialize to 0
+        draw_arr = [[0 for x in range(number_cells_width)] for y in range(number_cells_height)]
+
+        # Image processing
+        white_pixels = cv.findNonZero(self.edge_image) # Find all the pixels to draw
+
+        for pixel2 in white_pixels:
+            pixel = pixel2[0]
+
+            # Transform from image space to draw_Arr space
+            # findNonZero flips image X and Y
+            pixel_width_pos = pixel[0]
+            pixel_height_pos = pixel[1]
+
+            cell_pixel_width = math.floor((pixel_width_pos / self.image_width) * number_cells_width)
+            cell_pixel_height = math.floor((pixel_height_pos / self.image_height) * number_cells_height)
+
+            # Change draw arr pixel
+            draw_arr[cell_pixel_height -1 ][cell_pixel_width - 1] += 1
+
+    # Form array of lines to return
+    points = []
+    # Array of points [x, y]
+
+    # Move from one point in draw_arr to the next
+    for i in range(0, number_cells_width):
+
+        for j in range(0, number_cells_height):
+
+            # Determine whether to draw here, otherwise add point to lines after converting
+            if draw_arr[j][i] > 0:
+
+                # Calculate the pixel coordinates to draw a point
+                pixel_width_pos = math.floor((i / number_cells_width) * self.max_bed_width)
+                pixel_height_pos = math.floor((j / number_cells_height) * self.max_bed_height)
+
+                # Now change to X-first, then Y [x, y]
+                points.append([pixel_width_pos, pixel_height_pos])
+
+    return points
 
     def get_length_dict(self):
         """

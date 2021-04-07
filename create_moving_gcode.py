@@ -5,7 +5,7 @@ from ImageProcessing import process_image
 
 
 # Your filename here
-filename = 'dog.jpg'
+filename = 'dock.jpeg'
 
 # Printer configuration
 bed_height = 220

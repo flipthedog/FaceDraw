@@ -3,7 +3,7 @@
 # Rasters the image to create a list of tool paths
 
 # Import Statements
-from ImageProcessing import process_image
+from FaceDraw/ImageProcessing import process_image
 import cv2 as cv
 import math
 

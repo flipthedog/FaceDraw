@@ -4,6 +4,16 @@ import cv2 as cv
 import numpy as np
 import re
 
+def prepare(cv_image)
+    """
+    Prepare an image for the slicer
+    """
+
+    # Perform image processing
+    gray_image = process_image.grayImage(cv_image)
+    gray_edge_image = process_image.edgeDetection(gray_image)
+
+
 def grayImage(image, show=False):
     """
     Convert the image to grayscale
@@ -50,13 +60,14 @@ def contourImage(gray_image, show=False):
     :return: [opencv image] The contoured image
     """
     ret, thresh = cv.threshold(gray_image, 55, 255, 0)
-    contoured_image, contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contoured_image = cv.drawContours(gray_image, contours, -1, (0,255,0), 3)
     if show:
         show = cv.resize(contoured_image, (1320, 720))
         cv.imshow('Contour image', show)
     return contoured_image
 
-def thresholdImage(gray_image, stringType, gaussianSize=None, show=False):
+def thresholdImage(gray_image, stringType, low=120, high=255, gaussianSize=None, show=False):
     """
     Remove all of the pixels below a treshold value
     :param gray_image: [opencv image] A grayscale image
@@ -121,7 +132,7 @@ def edgeDetection(gray_image, show=False):
     :param show: [boolean] Show the new image
     :return: [opencv image] The edge detected image
     """
-    cannied_image = cv.Canny(gray_image, 85, 155, apertureSize=3)
+    cannied_image = cv.Canny(gray_image, 10, 50, apertureSize=3)
     if show:
         show = cv.resize(cannied_image, (1320, 720))
         cv.imshow('Edge Detection Image', show)
