@@ -1,5 +1,5 @@
 import cv2 as cv
-from Slicer import FaceDrawImage, New_Raster, Writer
+from Slicer import FaceDrawImage, Raster, Writer
 from ImageProcessing import process_image
 
 # INSTRUCTIONS
@@ -28,7 +28,7 @@ cv_image = process_image.openImage(filename)
 
 facedraw_image = FaceDrawImage.FaceDrawImage(cv_image, bed_size, line_width=1)
 
-raster = New_Raster.Raster(facedraw_image.final_image)
+raster = Raster.Raster(facedraw_image.final_image)
 
 points = raster.raster()
 
