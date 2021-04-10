@@ -4,15 +4,6 @@ import cv2 as cv
 import numpy as np
 import re
 
-def prepare(cv_image)
-    """
-    Prepare an image for the slicer
-    """
-
-    # Perform image processing
-    gray_image = process_image.grayImage(cv_image)
-    gray_edge_image = process_image.edgeDetection(gray_image)
-
 
 def grayImage(image, show=False):
     """
@@ -26,6 +17,7 @@ def grayImage(image, show=False):
         show = cv.resize(gray_image, (1320, 720))
         cv.imshow('Gray image', show)
     return gray_image
+
 
 def blurImage(gray_image, stringType, show=False):
     """
@@ -52,6 +44,7 @@ def blurImage(gray_image, stringType, show=False):
         cv.imshow('Blurred image', show)
     return blur
 
+
 def contourImage(gray_image, show=False):
     """
     Find the contours in the image and highlight them
@@ -66,6 +59,7 @@ def contourImage(gray_image, show=False):
         show = cv.resize(contoured_image, (1320, 720))
         cv.imshow('Contour image', show)
     return contoured_image
+
 
 def thresholdImage(gray_image, stringType, low=120, high=255, gaussianSize=None, show=False):
     """
@@ -125,6 +119,7 @@ def morphTrans(threshold_image, stringType, intensity, iterations, show=False):
 
     return morphed_image
 
+
 def edgeDetection(gray_image, show=False):
     """
     Perform edge detection on an image
@@ -132,11 +127,14 @@ def edgeDetection(gray_image, show=False):
     :param show: [boolean] Show the new image
     :return: [opencv image] The edge detected image
     """
-    cannied_image = cv.Canny(gray_image, 10, 50, apertureSize=3)
+    #cannied_image = cv.Canny(gray_image, 160, 190, apertureSize=3)
+    cannied_image = cv.Canny(gray_image, 100, 200, apertureSize=3)
+
     if show:
         show = cv.resize(cannied_image, (1320, 720))
         cv.imshow('Edge Detection Image', show)
     return cannied_image
+
 
 def openImage(image_name, show=False):
     """

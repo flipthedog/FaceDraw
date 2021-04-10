@@ -5,7 +5,6 @@
 import math
 from ImageProcessing import process_image
 import numpy as np
-import _datetime
 import cv2 as cv
 
 
@@ -84,6 +83,7 @@ class Slicer:
         # 3. Find the nearest pixel, pop it, and add it to return array
         # 4. Repeat finding nearest pixel until no pixels can be found or no more white pixels exist
         # 5. If no near pixel is found, add a move to the return array, and go to step 2.
+
         # Initialize the array of which squares need to be drawn to all zeros
         draw_arr = [[0 for x in range(self.width_number)] for y in range(self.height_number)]
 

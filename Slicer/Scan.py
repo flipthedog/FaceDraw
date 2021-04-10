@@ -4,8 +4,6 @@
 # Import
 import math
 from ImageProcessing import process_image
-import numpy as np
-import _datetime
 import cv2 as cv
 
 
@@ -116,26 +114,26 @@ class Scan:
             # Change draw arr pixel
             draw_arr[cell_pixel_height -1 ][cell_pixel_width - 1] += 1
 
-    # Form array of lines to return
-    points = []
-    # Array of points [x, y]
+        # Form array of lines to return
+        points = []
+        # Array of points [x, y]
 
-    # Move from one point in draw_arr to the next
-    for i in range(0, number_cells_width):
+        # Move from one point in draw_arr to the next
+        for i in range(0, number_cells_width):
 
-        for j in range(0, number_cells_height):
+            for j in range(0, number_cells_height):
 
-            # Determine whether to draw here, otherwise add point to lines after converting
-            if draw_arr[j][i] > 0:
+                # Determine whether to draw here, otherwise add point to lines after converting
+                if draw_arr[j][i] > 0:
 
-                # Calculate the pixel coordinates to draw a point
-                pixel_width_pos = math.floor((i / number_cells_width) * self.max_bed_width)
-                pixel_height_pos = math.floor((j / number_cells_height) * self.max_bed_height)
+                    # Calculate the pixel coordinates to draw a point
+                    pixel_width_pos = math.floor((i / number_cells_width) * self.max_bed_width)
+                    pixel_height_pos = math.floor((j / number_cells_height) * self.max_bed_height)
 
-                # Now change to X-first, then Y [x, y]
-                points.append([pixel_width_pos, pixel_height_pos])
+                    # Now change to X-first, then Y [x, y]
+                    points.append([pixel_width_pos, pixel_height_pos])
 
-    return points
+        return points
 
     def get_length_dict(self):
         """
@@ -164,7 +162,7 @@ class Scan:
         :return: [pixel1, pixel2, pixel3] An array of black pixels nearby the given pixels
         """
 
-        return return_arr
+        return None
 
     def find_white_pixels(self, draw_dict):
         """
@@ -177,7 +175,7 @@ class Scan:
         #   1. Go through the draw array to find all spots that need to be drawn
         #   2. Use max bed size to calculate spot to draw on the bed
 
-        return draw_pixels
+        return None
 
     @staticmethod
     def distance_between(pixel_1, pixel_2, printout=False):
