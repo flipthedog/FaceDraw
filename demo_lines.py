@@ -1,5 +1,5 @@
 import cv2 as cv
-from Slicer import FaceDrawImage, New_Raster, Writer
+from Slicer import FaceDrawImage, New_LinesDFS, New_LinesBFS, Writer
 from ImageProcessing import process_image
 
 # INSTRUCTIONS
@@ -26,10 +26,12 @@ z_tune = 0.0 # Tune the Z-axis
 # open the image
 cv_image = process_image.openImage(filename)
 
-facedraw_image = FaceDrawImage.FaceDrawImage(cv_image, bed_size, line_width=1)
+facedraw_image = FaceDrawImage.FaceDrawImage(cv_image, bed_size, line_width=0.5)
 
-raster = New_Raster.Raster(facedraw_image.final_image)
+lines = New_LinesDFS.Lines(facedraw_image)
 
-points = raster.raster()
+points = lines.lines()
+
+print(points)
 
 Writer.points_moves_to_gcode(filename, points, feedrate, z_hop=z_hop, z_tune=z_tune)

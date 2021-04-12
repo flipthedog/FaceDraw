@@ -15,7 +15,9 @@ import _datetime
 import cv2 as cv
 from Slicer.Pixel import Pixel
 
+
 class FaceDrawImage:
+
     def __init__(self, image, bed_size, line_width=1.0, lock_ratio=True):
         """
         Constructor, create a Raster object to slice an image. Raster uses
@@ -159,7 +161,7 @@ class FaceDrawImage:
                         # bottom-left
                         neighbors.append(connected_temp[height_number + 1][width_number - 1])
                     else:
-                        neighbors.append(connected_temp[height_number + 1][width_number - 1])
+                        neighbors.append(Pixel(-1, -1, -1, True))
 
                     if height_number + 1 > max_height:
                         # bottom
@@ -175,7 +177,7 @@ class FaceDrawImage:
 
                     connected_temp[j][i].neighbors = neighbors
 
-                    return connected_temp
+        return connected_temp
 
     def find_compression(self):
         """
