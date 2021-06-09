@@ -10,7 +10,13 @@ class Raster():
         Constructor, create the Raster object
         """
 
-        self.image = facedraw_image
+        self.facedraw_image = facedraw_image
+
+        self.x_compression = self.facedraw_image.max_bed_width / \
+            self.facedraw_image.width_number
+        self.y_compression = self.facedraw_image.max_bed_height / \
+            self.facedraw_image.height_number
+
         self.height = facedraw_image.shape[0]
         self.width = facedraw_image.shape[1]
 
@@ -30,7 +36,10 @@ class Raster():
 
                     # This means the dot needs to be drawn
 
-                    points.append([j, i])
+                    x_compression = self.facedraw_image.max_bed_width / self.facedraw_image.width_number
+                    y_compression = self.facedraw_image.max_bed_height / self.facedraw_image.height_number
+
+                    points.append([j * y_compression, i * x_compression])
                     points.append([-1, -1]) # Enter the move command
 
         return points

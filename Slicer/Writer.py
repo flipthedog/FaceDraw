@@ -4,51 +4,51 @@
 import _datetime
 import os
 
+# # image_to_gcode
+# # Input: image: the grayscale, line image to be converted into g-code commands
+# # Input: linewidth: The width of the line to be drawn
+# # Input: raster: Boolean, whether to raster or not
+# # Input: filename: the name of the file generated
+# # Go through the picture pixel by pixel
+# def points_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
+#     """
+#     Convert a list of points to G-code.
+#     :param filename: [str] The name of the file to be created
+#     :param points: [x, y] The list of points
+#     :param feedrate: [mm/s] The feedrate of the Gcode
+#     :param z_hop: [mm] Total distance to hop in z between moves
+#     :param z_tune: [mm] Tuning parameter
+#     :return: None
+#     """
+#
+#     filename, file_ext = os.path.splitext(fullfilename)
+#
+#     filename = "./GCode/" + filename + str(".gcode")
+#
+#     # Check for file existence and overwrite if necessary
+#
+#     try:
+#         # File already exists, overwrite it
+#         file = open(str(filename), 'w', 1)
+#
+#     except FileNotFoundError:
+#         # File does not exist, create it
+#         print(FileNotFoundError.strerror)
+#         file = open(str(filename), 'w')
+#
+#     # Write to the file
+#     write_introduction(file, filename) # Write an introduction to the file
+#     write_body(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
+#     write_conclusion(file, filename) # Write the conclusion to the file
+#     file.close() # Close the file
+
 # image_to_gcode
 # Input: image: the grayscale, line image to be converted into g-code commands
 # Input: linewidth: The width of the line to be drawn
 # Input: raster: Boolean, whether to raster or not
 # Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
-def points_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
-    """
-    Convert a list of points to G-code.
-    :param filename: [str] The name of the file to be created
-    :param points: [x, y] The list of points
-    :param feedrate: [mm/s] The feedrate of the Gcode
-    :param z_hop: [mm] Total distance to hop in z between moves
-    :param z_tune: [mm] Tuning parameter
-    :return: None
-    """
-
-    filename, file_ext = os.path.splitext(fullfilename)
-
-    filename = "./GCode/" + filename + str(".gcode")
-
-    # Check for file existence and overwrite if necessary
-
-    try:
-        # File already exists, overwrite it
-        file = open(str(filename), 'w', 1)
-
-    except FileNotFoundError:
-        # File does not exist, create it
-        print(FileNotFoundError.strerror)
-        file = open(str(filename), 'w')
-
-    # Write to the file
-    write_introduction(file, filename) # Write an introduction to the file
-    write_body(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
-    write_conclusion(file, filename) # Write the conclusion to the file
-    file.close() # Close the file
-
-# image_to_gcode
-# Input: image: the grayscale, line image to be converted into g-code commands
-# Input: linewidth: The width of the line to be drawn
-# Input: raster: Boolean, whether to raster or not
-# Input: filename: the name of the file generated
-# Go through the picture pixel by pixel
-def points_moves_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=None):
+def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, z_hop=None, z_tune=None):
     """
     Convert a list of points to G-code.
     :param filename: [str] The name of the file to be created
@@ -78,7 +78,7 @@ def points_moves_to_gcode(fullfilename, points, feedrate, z_hop=None, z_tune=Non
 
     # Write to the file
     write_introduction(file, filename) # Write an introduction to the file
-    write_body2(file, points, z_tune, z_hop, feedrate) # Write the G-code commands to the file
+    write_body2(file, points, z_tune, z_hop, travelrate, drawrate) # Write the G-code commands to the file
     write_conclusion(file, filename) # Write the conclusion to the file
     file.close() # Close the file
 
@@ -140,11 +140,13 @@ def write_body(file, lines, z_tune=0.0, z_hop=5.0, feedrate=750):
 
         file.write("\nG1 " + "Z" + str(g_code_z) + " F750") # Move up the tool head
 
-def write_body2(file, lines, z_tune=0.0, z_hop=5.0, feedrate=1000):
+def write_body2(file, lines, z_tune=0.0, z_hop=5.0, travelrate=1500, drawrate=750):
     file.write("\n; This image consists of " + str(len(lines)) + " separate points")
 
     high_z = z_tune + z_hop
     draw_z = z_tune
+    next_x = 0
+    next_y = 0
 
     # Iterate through all the points in the array of points
     for i in range(0, len(lines)):
@@ -152,19 +154,21 @@ def write_body2(file, lines, z_tune=0.0, z_hop=5.0, feedrate=1000):
 
         if i + 1 < len(lines):
             # Point = (height, width)
-            g_code_x = point[0]
-            g_code_y = point[1]
+            g_code_x = point[1]
+            g_code_y = point[0]
             g_code_z = high_z
+            next_point = lines[i + 1]
+            next_x = next_point[1]
+            next_y = next_point[0]
 
-            if g_code_x == -1 and g_code_y == -1:
-                # Do a move command, don't draw
-                # Move to the next point in the array
-                next_point = lines[i + 1]
-                next_x = next_point[0]
-                next_y = next_point[1]
-                g_code_z = high_z
+            if next_x != -1 and next_y != -1:
 
-                file.write("\nG1 Z" + str(g_code_z))  # Move up
-                file.write("\nG1 X" + str(next_x) + " Y" + str(next_y) ) # Move above next point
-            else:
-                file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(draw_z) + " F" + str(feedrate))
+                if g_code_x == -1 and g_code_y == -1:
+                    # Do a move command, don't draw
+                    # Move to the next point in the array
+
+                    file.write("\nG1 Z" + str(g_code_z))  # Move up
+                    file.write("\nG1 X" + str(next_x) + " Y" + str(next_y) + " F" + str(travelrate)) # Move above next point
+                    file.write("\nG1 Z" + str(0) + " F" + str(drawrate))
+                else:
+                    file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(draw_z) + " F" + str(drawrate))

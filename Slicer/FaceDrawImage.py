@@ -51,16 +51,22 @@ class FaceDrawImage:
 
         # Image specifications
         shape = image.shape
+        print("Image size: ", shape)
         self.image_height = shape[0]  # Vertical pixel number
         self.image_width = shape[1]  # Horizontal pixel number
 
-        # If lock_ratio is on, the program will maintain the ratio of the image by reducing the bed-size
-        # to maintain the height-width ratio of the image
+        # If lock_ratio is on, the program will maintain the ratio of the image
+        # by reducing the bed-size to maintain the height-width ratio of the
+        # image
         if lock_ratio:
-            self.find_compression()
+            self = self.find_compression()
 
-        self.width_number = math.floor(self.max_bed_width / self.line_width) # Number of possible pixels in drawing width
-        self.height_number = math.floor(self.max_bed_height / self.line_width) # Number of possible pixels in drawing height
+        self.width_number = math.floor(self.max_bed_width / self.line_width)
+
+        self.height_number = math.floor(self.max_bed_height / self.line_width)
+
+        print(self.width_number)
+        print(self.height_number)
 
         self.white_pixels = cv.findNonZero(self.edge_image)
 
@@ -83,12 +89,16 @@ class FaceDrawImage:
         #img = process_image.morphTrans(blank_image, "erode", 2, 1)
         self.final_image = process_image.edgeDetection(blank_image)
 
+
         cv.imshow("eroded", blank_image)
         cv.imshow("final image", self.final_image)
         cv.waitKey(0)
         cv.destroyAllWindows()
 
         self.connected_image = self.create_grid()
+
+        print("Created connected grid image")
+        print("Size: w", self.width_number, ", h", self.height_number)
 
     def create_grid(self):
         """
@@ -194,3 +204,5 @@ class FaceDrawImage:
         else:
             # This means that the height of the bed will have to decrease
             self.max_bed_height = math.floor((image_ratio / bed_ratio) * self.max_bed_height)
+
+        return self
