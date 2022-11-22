@@ -3,3 +3,6 @@ GCode/
 */__pycache__/
 /images
 /__pycache__
+/.mypy_cache
+*notes
+*TODO

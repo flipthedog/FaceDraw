@@ -43,12 +43,8 @@ import os
 #     file.close() # Close the file
 
 # image_to_gcode
-# Input: image: the grayscale, line image to be converted into g-code commands
-# Input: linewidth: The width of the line to be drawn
-# Input: raster: Boolean, whether to raster or not
-# Input: filename: the name of the file generated
 # Go through the picture pixel by pixel
-def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, z_hop=None, z_tune=None):
+def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, bed_size, z_hop=None, z_tune=None):
     """
     Convert a list of points to G-code.
     :param filename: [str] The name of the file to be created
@@ -58,6 +54,13 @@ def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, z_hop=None
     :param z_tune: [mm] Tuning parameter
     :return: None
     """
+
+    if max(list(zip(*points))[0]) > bed_size[0]:
+        raise Exception("Due to an error, some points fall outside of the maximum height bed-size")
+    elif max(list(zip(*points))[1]) > bed_size[1]:
+        raise Exception("Due to an error, some points fall outside of the maximum width bed-size")
+    else:
+        print("Verified that no points fall outside bed size")
 
     filename, file_ext = os.path.splitext(fullfilename)
 
@@ -145,8 +148,6 @@ def write_body2(file, lines, z_tune=0.0, z_hop=5.0, travelrate=1500, drawrate=75
 
     high_z = z_tune + z_hop
     draw_z = z_tune
-    next_x = 0
-    next_y = 0
 
     # Iterate through all the points in the array of points
     for i in range(0, len(lines)):
@@ -170,5 +171,7 @@ def write_body2(file, lines, z_tune=0.0, z_hop=5.0, travelrate=1500, drawrate=75
                     file.write("\nG1 Z" + str(g_code_z))  # Move up
                     file.write("\nG1 X" + str(next_x) + " Y" + str(next_y) + " F" + str(travelrate)) # Move above next point
                     file.write("\nG1 Z" + str(0) + " F" + str(drawrate))
+
                 else:
+
                     file.write("\nG1 X" + str(g_code_x) + " Y" + str(g_code_y) + " Z" + str(draw_z) + " F" + str(drawrate))
