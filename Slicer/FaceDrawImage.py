@@ -32,6 +32,8 @@ class FaceDrawImage:
         """
 
         # The image to be processed
+
+        # image = cv.flip(image, 0)
         self.original_image = image
         self.gray_image = process_image.grayImage(self.original_image, show)
         self.edge_image = process_image.edgeDetection(self.gray_image, show)

@@ -64,7 +64,12 @@ def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, bed_size, 
 
     filename, file_ext = os.path.splitext(fullfilename)
 
-    filename = "./GCode/" + filename + str(".gcode")
+    subdir = "./GCode/"
+    filename = subdir + filename + str(".gcode")
+
+    if not os.path.exists(subdir):
+        # Create GCode folder if it does not exist already
+        os.makedirs(subdir)
 
     try:
         # Check for file existence and overwrite if necessary
