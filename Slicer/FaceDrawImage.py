@@ -40,8 +40,8 @@ class FaceDrawImage:
         self.inverted_image = process_image.invertImage(self.edge_image, show)
 
         # Show the images to the user
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+        # cv.waitKey(0)
+        # cv.destroyAllWindows()
 
         # The resolution of the image
         self.line_width = line_width
@@ -55,7 +55,6 @@ class FaceDrawImage:
 
         # Image specifications
         shape = image.shape
-        print("Image size: ", shape)
         self.image_height = shape[0]  # Vertical pixel number
         self.image_width = shape[1]  # Horizontal pixel number
 
@@ -63,19 +62,16 @@ class FaceDrawImage:
         # by reducing the bed-size to maintain the height-width ratio of the
         # image
 
-        print("Bed size: Height:", self.max_bed_height, "Width: ", self.max_bed_width)
+        # print("Bed size: Height:", self.max_bed_height, "Width: ", self.max_bed_width)
 
         if lock_ratio:
             self = self.find_compression()
 
-        print("Bed size: Height:", self.max_bed_height, "Width: ", self.max_bed_width)
+        # print("Bed size: Height:", self.max_bed_height, "Width: ", self.max_bed_width)
 
         self.width_number = math.floor(self.max_bed_width / self.line_width)
 
         self.height_number = math.floor(self.max_bed_height / self.line_width)
-
-        print(self.width_number)
-        print(self.height_number)
 
         self.white_pixels = cv.findNonZero(self.edge_image)
 
@@ -110,6 +106,8 @@ class FaceDrawImage:
 
         print("Created connected grid image")
         print("Size: w", self.width_number, ", h", self.height_number)
+        print("Original Image size: ", shape)
+        print("Bed Size: ", self.max_bed_width, ",", self.max_bed_height)
 
     def __str__(self):
 
@@ -246,7 +244,7 @@ class FaceDrawImage:
         # else:
         #     # This means that we will have to adjust the width of the bed
         #
-        print(f'bed_ratio: {bed_ratio}, image_ratio: {image_ratio}')
+        # print(f'bed_ratio: {bed_ratio}, image_ratio: {image_ratio}')
 
         if bed_ratio < image_ratio:
             # This means that the width of the bed will have to decrease

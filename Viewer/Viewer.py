@@ -3,6 +3,9 @@ from matplotlib.path import Path
 import matplotlib.patches as patches
 import matplotlib
 
+import io
+from PIL import Image
+
 class Viewer:
     """
     Class to manage the drawing and visualization of moves from either Gcode or array of points
@@ -42,7 +45,7 @@ class Viewer:
         self.to_draw = [output, codes]
         return output, codes
 
-    def plot_moves(self, max_x, max_y):
+    def plot_moves(self, max_x, max_y, show=False):
 
         matplotlib.use('TkAgg')
 
@@ -54,6 +57,12 @@ class Viewer:
         ax.set_xlim(-10, max_x + 10)
         ax.set_ylim(-10, max_y + 10)
         ax.invert_yaxis()
-        ax.invert_xaxis()
-        plt.show()
+        # ax.invert_xaxis()
 
+        if show:
+            plt.show()
+        else:
+            img_buf = io.BytesIO()
+            plt.savefig(img_buf, format='png', dpi=450)
+            im = Image.open(img_buf)
+            return im

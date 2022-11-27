@@ -20,7 +20,7 @@ class Lines():
         self.height_compression = self.facedraw_image.max_bed_height / \
             self.facedraw_image.height_number
 
-        print(f"Max facedraw boundaries: H{self.facedraw_image.max_bed_height}, {self.facedraw_image.max_bed_width}")
+        # print(f"Max facedraw boundaries: H{self.facedraw_image.max_bed_height}, {self.facedraw_image.max_bed_width}")
 
         self.image = facedraw_image.final_image
         self.height = self.image.shape[0]
@@ -31,7 +31,7 @@ class Lines():
 
     def lines(self):
 
-        print("Calculating lines")
+        # print("Calculating lines")
         # points that have already been used for drawing
         used_points = []
 

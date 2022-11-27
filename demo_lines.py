@@ -2,6 +2,8 @@ from Slicer import FaceDrawImage, New_LinesDFS, New_LinesBFS, Writer
 from ImageProcessing import process_image
 from Viewer import Viewer
 
+import time
+
 import matplotlib as mpl
 
 import matplotlib.pyplot as plt
@@ -35,15 +37,19 @@ z_tune = 0.0  # Tune the Z-axis
 # open the image
 cv_image = process_image.openImage(filename, show=True)
 
-facedraw_image = FaceDrawImage.FaceDrawImage(cv_image, bed_size, line_width=1, show=True)
+facedraw_image = FaceDrawImage.FaceDrawImage(cv_image, bed_size, line_width=0.5, show=True)
 
 # facedraw_image.__str__()
+
+start_time = time.time()
 
 lines = New_LinesDFS.Lines(facedraw_image, 15)
 
 points = lines.lines()
 
-print(points)
+print(f'Took {time.time() - start_time} seconds to run')
+print(f'Generated {len(points)} moves')
+
 
 Writer.points_moves_to_gcode(
     filename, points, travelrate, drawrate, bed_size, z_hop=z_hop, z_tune=z_tune)
