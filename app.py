@@ -23,11 +23,39 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = dbc.Container(
     [
         dbc.Row([
-            dbc.Col(dbc.Card([html.Img(id="original-img", src="", alt='Your selected image'),],), width=4),
-            dbc.Col(dbc.Card([html.Img(id="processed-img", src="", alt='Your processed image'),]), width=4),
-            dbc.Col(dbc.Card([html.Img(id="facedraw-img", src="", alt="The final image drawing representation"),]), width=4)
+            dbc.Col(dbc.Card([html.Img(id="original-img", src="", alt='Your selected image'),],), style={'width': '33%'}),
+            dbc.Col(dbc.Card([html.Img(id="processed-img", src="", alt='Your processed image'),]), style={'width': '33%'}),
+            dbc.Col(dbc.Card([html.Img(id="facedraw-img", src="", alt="The final image drawing representation"),]), style={'width': '33%'})
         ]),
+        dbc.Row([
+           # Putting all input for processing here
+            dbc.Card([
+                html.H3("Edge Detection Settings"),
+                dbc.Input(id="low-th-input", type="number", min=0, max=300, value=100),
+                dbc.FormText("Low Threshold Value"),
+                dbc.Input(id="high-th-input", type="number", min=100, max=300, value=200),
+                dbc.FormText("High Threshold Value"),
+                dbc.Input(id="aperture-edge-input", type="number", min=0, max=10, value=3),
+                dbc.FormText("Aperture Size Value"),
+            ]),
+            dbc.Card([
+                html.H3("Drawing/Slicing Settings"),
+                dcc.Dropdown(options=["DFS", "BFS", "Raster"], value="DFS", id="algorithm-selector"),
+                dbc.FormText("Algorithm Selection"),
+                dbc.Input(id="line-width", type="number", min=0.1, max=5, value=1),
+                dbc.FormText("Line Width"),
+                dbc.Input(id="bed-width", type="number", min=0, max=1000, value=200, style={'marginRight': '10px'}),
+                dbc.Input(id="bed-height", type="number", min=0, max=1000, value=200),
+                dbc.FormText("3D Printer Bed Size"),
+                dbc.Checkbox(id="lock-ratio", label="Lock ratio of image on compression", value=True)
+                # Drawing/slicer settings
+                # Algorithm selection
+                # line width
+                # max bed width, max bed height
+                # lock ratio
 
+            ])
+        ]),
         dbc.Row([
             dbc.Container([
                 dcc.Dropdown(id="filename-selector", placeholder="Select your picture", options={}),

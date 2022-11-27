@@ -45,7 +45,7 @@ class Viewer:
         self.to_draw = [output, codes]
         return output, codes
 
-    def plot_moves(self, max_x, max_y, show=False):
+    def plot_moves(self, max_x, max_y, show=False, hideaxis=True):
 
         matplotlib.use('TkAgg')
 
@@ -58,6 +58,9 @@ class Viewer:
         ax.set_ylim(-10, max_y + 10)
         ax.invert_yaxis()
         # ax.invert_xaxis()
+
+        if hideaxis:
+            ax.set_axis_off()
 
         if show:
             plt.show()

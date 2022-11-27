@@ -35,9 +35,9 @@ class FaceDrawImage:
 
         # image = cv.flip(image, 0)
         self.original_image = image
-        self.gray_image = process_image.grayImage(self.original_image, show)
-        self.edge_image = process_image.edgeDetection(self.gray_image, show)
-        self.inverted_image = process_image.invertImage(self.edge_image, show)
+        self.gray_image = process_image.grayImage(self.original_image, show=show)
+        self.edge_image = process_image.edgeDetection(self.gray_image, show=show)
+        self.inverted_image = process_image.invertImage(self.edge_image, show=show)
 
         # Show the images to the user
         # cv.waitKey(0)

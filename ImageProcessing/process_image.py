@@ -120,7 +120,7 @@ def morphTrans(threshold_image, stringType, intensity, iterations, show=False):
     return morphed_image
 
 
-def edgeDetection(gray_image, show=False):
+def edgeDetection(gray_image, low_thresh=100, high_tresh=200, aperture_size= 3, show=False):
     """
     Perform edge detection on an image
     :param gray_image: [opencv image] A gray image to perform edge detection on
@@ -128,7 +128,7 @@ def edgeDetection(gray_image, show=False):
     :return: [opencv image] The edge detected image
     """
     #cannied_image = cv.Canny(gray_image, 160, 190, apertureSize=3)
-    cannied_image = cv.Canny(gray_image, 100, 200, apertureSize=3)
+    cannied_image = cv.Canny(gray_image, low_thresh, high_tresh, apertureSize=aperture_size)
 
     if show:
         show = cv.resize(cannied_image, (1320, 720))
