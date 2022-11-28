@@ -45,14 +45,14 @@ class Viewer:
         self.to_draw = [output, codes]
         return output, codes
 
-    def plot_moves(self, max_x, max_y, show=False, hideaxis=True):
+    def plot_moves(self, max_x, max_y, show=False, hideaxis=True, plot_line_width=0.5):
 
         matplotlib.use('TkAgg')
 
         fig, ax = plt.subplots()
         path = Path(self.to_draw[0], self.to_draw[1])
 
-        patch = patches.PathPatch(path, fill=False, lw=0.5)
+        patch = patches.PathPatch(path, fill=False, lw=plot_line_width)
         ax.add_patch(patch)
         ax.set_xlim(-10, max_x + 10)
         ax.set_ylim(-10, max_y + 10)

@@ -16,9 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # 3. Run the Script
 
 # Your filename here
-# filename = 'dog.jpg'
-
-filename = 'initial.png'
+filename = 'dog.jpg'
 
 # Printer configuration
 bed_height = 220

@@ -21,15 +21,16 @@ of black pixels in it.
 
 Initial:
 
-![](./images/initial.png)
+![](./images/bird.jpg)
 
 Processed:
-![](./images/processed.png)
+![](./images/processed_bird.png)
 
 
 Final Result:
+![](./images/final_gcode_bird.png)
 
-![](./images/final_result.jpg)
+Drawings:
 ![](./images/another_final_result.jpeg)
 
 ## Work in Progress

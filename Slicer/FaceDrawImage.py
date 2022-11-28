@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 
 class FaceDrawImage:
 
-    def __init__(self, image, bed_size, line_width=1.0, lock_ratio=True, show=False):
+    def __init__(self, image, bed_size, line_width=1.0, options=None, lock_ratio=True, show=False):
         """
         Constructor, create a Raster object to slice an image. Raster uses
             individual points as opposed to lines
@@ -34,10 +34,21 @@ class FaceDrawImage:
         # The image to be processed
 
         # image = cv.flip(image, 0)
-        self.original_image = image
-        self.gray_image = process_image.grayImage(self.original_image, show=show)
-        self.edge_image = process_image.edgeDetection(self.gray_image, show=show)
-        self.inverted_image = process_image.invertImage(self.edge_image, show=show)
+
+        if options is None:
+            self.original_image = image
+            self.gray_image = process_image.grayImage(self.original_image, show=show)
+            self.edge_image = process_image.edgeDetection(self.gray_image, show=show)
+            self.inverted_image = process_image.invertImage(self.edge_image, show=show)
+        else:
+            self.original_image = image
+            self.gray_image = process_image.grayImage(self.original_image, show=show)
+            self.edge_image = process_image.edgeDetection(self.gray_image,
+                                                          options["edge_low_th"],
+                                                          options["edge_high_th"],
+                                                          options["edge_apt"],
+                                                          show=show)
+            self.inverted_image = process_image.invertImage(self.edge_image, show=show)
 
         # Show the images to the user
         # cv.waitKey(0)
