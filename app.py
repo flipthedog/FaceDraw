@@ -43,54 +43,64 @@ navbar = dbc.Navbar(
 )
 
 vision_tab = dbc.Card([
-                html.H3("Edge Detection Settings"),
-                dbc.Input(id="low-th-input", type="number", min=0, max=300, value=100),
-                dbc.FormText("Low Threshold Value"),
-                dbc.Input(id="high-th-input", type="number", min=100, max=300, value=200),
-                dbc.FormText("High Threshold Value"),
-                dbc.Input(id="aperture-edge-input", type="number", min=3, max=7, value=3),
-                dbc.FormText("Aperture Size Value"),
-            ])
+    html.H3("Edge Detection Settings"),
+    dbc.Input(id="low-th-input", type="number", min=0, max=300, value=100),
+    dbc.FormText("Low Threshold Value"),
+    dbc.Input(id="high-th-input", type="number", min=100, max=300, value=200),
+    dbc.FormText("High Threshold Value"),
+    dbc.Input(id="aperture-edge-input", type="number", min=3, max=7, value=3),
+    dbc.FormText("Aperture Size Value"),
+])
 
 drawing_tab = dbc.Card([
-                # Drawing/slicer settings
-                html.H3("Drawing/Slicing Settings"),
-                dcc.Dropdown(options=["DFS", "BFS", "Raster"], value="DFS", id="algorithm-selector"),
-                dbc.FormText("Algorithm Selection"),
-                dbc.Input(id="line-width", type="number", min=0.1, max=5, value=1),
-                dbc.FormText("Line Width"),
-                dbc.Input(id="bed-width", type="number", min=0, max=1000, value=200, style={'marginRight': '10px'}),
-                dbc.Input(id="bed-height", type="number", min=0, max=1000, value=200),
-                dbc.FormText("3D Printer Bed Size"),
-                dbc.Checkbox(id="lock-ratio", label="Lock ratio of image on compression", value=True)
-            ])
+    # Drawing/slicer settings
+    html.H3("Drawing/Slicing Settings"),
+    dcc.Dropdown(options=["DFS", "BFS", "Raster"], value="DFS", id="algorithm-selector"),
+    dbc.FormText("Algorithm Selection"),
+    dbc.Input(id="line-width", type="number", min=0.1, max=5, value=1),
+    dbc.FormText("Line Width"),
+    dbc.Input(id="bed-width", type="number", min=0, max=1000, value=200, style={'marginRight': '10px'}),
+    dbc.Input(id="bed-height", type="number", min=0, max=1000, value=200),
+    dbc.FormText("3D Printer Bed Size"),
+    dbc.Checkbox(id="lock-ratio", label="Lock ratio of image on compression", value=True)
+])
 
 gcode_tab = dbc.Card([
-                # Gcode options
-                html.H3("GCode Settings"),
-                dbc.Input(id="travel-speed", type="number", min=1000, max=5000, value=2000),
-                dbc.FormText("Travel Speed (mm/s)"),
-                dbc.Input(id="drawrate-speed", type="number", min=100, max=3000, value=750),
-                dbc.FormText("Draw Speed (mm/s)"),
-                dbc.Input(id="z-hop", type="number", min=0, max=10, value=3),
-                dbc.FormText("Z-Hop (mm), amount to go up for travel move"),
-                dbc.Input(id="z-tune", type="number", min=-2, max=2, value=0.0),
-                dbc.FormText("Z-Tune (mm), amount to go up or down to tune Z-axis"),
-            ])
+    # Gcode options
+    html.H3("GCode Settings"),
+    dbc.Input(id="travel-speed", type="number", min=1000, max=5000, value=2000),
+    dbc.FormText("Travel Speed (mm/s)"),
+    dbc.Input(id="drawrate-speed", type="number", min=100, max=3000, value=750),
+    dbc.FormText("Draw Speed (mm/s)"),
+    dbc.Input(id="z-hop", type="number", min=0, max=10, value=3),
+    dbc.FormText("Z-Hop (mm), amount to go up for travel move"),
+    dbc.Input(id="z-tune", type="number", min=-2, max=2, value=0.0),
+    dbc.FormText("Z-Tune (mm), amount to go up or down to tune Z-axis"),
+])
 
 # Main app layout:
 app.layout = dbc.Container(
     [
         navbar,
         dbc.Row([
-            dbc.Col(dbc.Card([html.Img(id="original-img", src="", alt='Your selected image'), ], ),
-                    style={'width': '33%'}),
-            dbc.Col(dbc.Card([html.Img(id="processed-img", src="", alt='Your processed image'), ]),
-                    style={'width': '33%'}),
-            dbc.Col(dbc.Card([html.Img(id="facedraw-img", src="", alt="The final image drawing representation"), ]),
-                    style={'width': '33%'})
-            ],
-            style={'padding': '5px'}
+            dcc.Loading(id="loading-original-img", type="circle", style={'width': '33%'},
+                        children=[
+                            dbc.Col(dbc.Card([html.Img(id="original-img", src="", alt='Your selected image'), ], ),
+                                    style={'width': '33%'})
+                        ]
+                        ),
+            dbc.Col(dcc.Loading(id="loading-processed-img", type="circle", style={'width': '33%'},
+                        children=[
+                            dbc.Card([html.Img(id="processed-img", src="", alt='Your processed image'), ])
+                        ]
+                        ), style={'width': '33%'}),
+            dbc.Col(dcc.Loading(id="loading-facedraw-img", type="circle", style={'width': '33%'},
+                                children=[
+                                    dbc.Card([html.Img(id="facedraw-img", src="",
+                                                       alt="The final image drawing representation"), ]),
+                                ]
+                                ), style={'width': '33%'})
+        ], style={'padding': '5px'}
         ),
         dbc.Row([
             # Putting all input for processing here
@@ -158,7 +168,6 @@ def update_image(selected_value):
      Input("aperture-edge-input", "value")]
 )
 def create_image(n_clicks, input_value, edge_low_th, edge_high_th, edge_apt):
-
     options = {
         "edge_low_th": edge_low_th,
         "edge_high_th": edge_high_th,
@@ -204,7 +213,6 @@ def create_image(n_clicks, input_value, edge_low_th, edge_high_th, edge_apt):
 )
 def create_slicer_image(n_clicks, selected_value, edge_low_th, edge_high_th, edge_apt, algorithm_value, line_width,
                         bed_width, bed_height, lock_ratio, travel_speed, drawrate_speed, z_hop, z_tune):
-
     if ctx.triggered_id == "create-gcode":
         # Only triggers if the user specifically presses the "Generate Gcode" Button
         print("Trying facedraw generation")
