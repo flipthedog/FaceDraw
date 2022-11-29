@@ -5,3 +5,5 @@ GCode/
 /.mypy_cache
 *notes
 *TODO
+Archive/
+venv/

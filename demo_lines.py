@@ -16,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # 3. Run the Script
 
 # Your filename here
-filename = 'dog.jpg'
+filename = 'bird2.jpg'
 
 # Printer configuration
 bed_height = 220
@@ -54,4 +54,4 @@ Writer.points_moves_to_gcode(
 
 viewer = Viewer.Viewer(points)
 viewer.create_2d_moves()
-viewer.plot_moves(max_x=bed_width, max_y= bed_height)
+viewer.plot_moves(max_x=bed_width, max_y=bed_height)

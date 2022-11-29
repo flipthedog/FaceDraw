@@ -90,6 +90,8 @@ def points_moves_to_gcode(fullfilename, points, travelrate, drawrate, bed_size, 
     write_conclusion(file, filename) # Write the conclusion to the file
     file.close() # Close the file
 
+    return file.name
+
 def write_introduction(file, filename):
     """
     Write the introduction to a Gcode file
